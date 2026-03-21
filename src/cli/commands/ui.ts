@@ -7,7 +7,7 @@ import cors from 'cors';
 import { getAllTablesMeta, executeSQL, executeSQLWithTime, getTableMeta } from '../../core/engine/duckdb';
 import { getLLMClient } from '../../core/llm/client';
 import { SQLBuilder } from '../../core/llm/sql-builder';
-import { getConfig } from '../../utils/config';
+import { getConfig, validateConfig } from '../../utils/config';
 import { analyzeTable } from '../../core/analyzer/insights';
 import { indexTableSchema, recommendTables } from '../../core/engine/lancedb';
 import { importCSV } from '../../core/importer/csv';
@@ -121,7 +121,10 @@ export async function uiCommand(port: number = PORT): Promise<void> {
       
       const config = getConfig();
       
-      if (!config.llm.apiKey) {
+      // 验证 API Key 配置
+      try {
+        validateConfig(config);
+      } catch {
         return res.status(400).json({
           success: false,
           error: '未配置 API Key，请设置 DATAMIND_API_KEY 或 ZHIPU_API_KEY 环境变量'

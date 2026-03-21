@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { analyzeTable, formatAnalysisResult } from '../../core/analyzer/insights';
 import { getAllTablesMeta, getTableMeta } from '../../core/engine/duckdb';
+import { QueryError } from '../../utils/errors';
 
 export async function analyzeCommand(tableName?: string): Promise<void> {
   const spinner = ora('正在分析数据...').start();
@@ -31,7 +32,9 @@ export async function analyzeCommand(tableName?: string): Promise<void> {
     }
   } catch (error) {
     spinner.fail(chalk.red('分析失败'));
-    console.error(chalk.red(error instanceof Error ? error.message : String(error)));
-    process.exit(1);
+    if (error instanceof QueryError) {
+      throw error;
+    }
+    throw new QueryError(error instanceof Error ? error.message : String(error));
   }
 }

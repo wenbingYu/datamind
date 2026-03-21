@@ -5,6 +5,7 @@ import ora from 'ora';
 import { analyzeTable, AnalysisResult } from '../../core/analyzer/insights';
 import { getAllTablesMeta, getTableMeta, executeSQL } from '../../core/engine/duckdb';
 import { generateChartConfig, inferChartType, ChartType } from '../../utils/charts';
+import { FileError, QueryError } from '../../utils/errors';
 
 interface ExportOptions {
   title?: string;
@@ -23,8 +24,7 @@ export async function exportCommand(outputFile: string, options: ExportOptions =
     if (options.table) {
       tables = tables.filter(t => t.name.toLowerCase() === options.table!.toLowerCase());
       if (tables.length === 0) {
-        spinner.fail(chalk.red(`表 "${options.table}" 不存在`));
-        process.exit(1);
+        throw new FileError(`表 "${options.table}" 不存在`);
       }
     }
     
@@ -50,9 +50,7 @@ export async function exportCommand(outputFile: string, options: ExportOptions =
     } else if (ext === '.json') {
       await exportJSON(outputFile, analyses, options);
     } else {
-      spinner.fail(chalk.red(`不支持的文件格式: ${ext}`));
-      console.log(chalk.dim('支持的格式: .md, .html, .json'));
-      process.exit(1);
+      throw new FileError(`不支持的文件格式: ${ext}，支持的格式: .md, .html, .json`);
     }
     
     spinner.succeed(chalk.green(`报告已导出到: ${outputFile}`));
@@ -61,8 +59,10 @@ export async function exportCommand(outputFile: string, options: ExportOptions =
     
   } catch (error) {
     spinner.fail(chalk.red('导出失败'));
-    console.error(chalk.red(error instanceof Error ? error.message : String(error)));
-    process.exit(1);
+    if (error instanceof FileError || error instanceof QueryError) {
+      throw error;
+    }
+    throw new QueryError(error instanceof Error ? error.message : String(error));
   }
 }
 

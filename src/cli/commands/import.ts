@@ -4,12 +4,12 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { importCSV } from '../../core/importer/csv';
 import { getConfig, ensureDataDir } from '../../utils/config';
+import { FileError, ImportError } from '../../utils/errors';
 
 export async function importCommand(file: string): Promise<void> {
   // Check file exists
   if (!fs.existsSync(file)) {
-    console.error(chalk.red(`错误: 文件不存在: ${file}`));
-    process.exit(1);
+    throw new FileError(`文件不存在: ${file}`);
   }
 
   // Ensure data directory exists
@@ -33,13 +33,13 @@ export async function importCommand(file: string): Promise<void> {
       console.log();
       console.log(chalk.dim(`使用 'datamind ask "问题"' 查询数据`));
     } else {
-      spinner.fail(chalk.red(`不支持的文件格式: ${ext}`));
-      console.log(chalk.dim('目前支持: CSV'));
-      process.exit(1);
+      throw new FileError(`不支持的文件格式: ${ext}，目前支持: CSV`);
     }
   } catch (error) {
     spinner.fail(chalk.red('导入失败'));
-    console.error(chalk.red(error instanceof Error ? error.message : String(error)));
-    process.exit(1);
+    if (error instanceof FileError || error instanceof ImportError) {
+      throw error;
+    }
+    throw new ImportError(error instanceof Error ? error.message : String(error));
   }
 }
