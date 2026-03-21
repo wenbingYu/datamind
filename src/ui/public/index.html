@@ -677,9 +677,6 @@
           <span id="currentChatTitle">新对话</span>
         </div>
         <div class="header-actions">
-          <button class="btn btn-secondary" id="uploadBtn">
-            📤 <span>上传文件</span>
-          </button>
           <button class="btn btn-secondary" id="clearBtn">
             🗑️ <span>清空</span>
           </button>
@@ -846,7 +843,6 @@
       chatInput: $('chatInput'),
       sendBtn: $('sendBtn'),
       newChatBtn: $('newChatBtn'),
-      uploadBtn: $('uploadBtn'),
       clearBtn: $('clearBtn'),
       attachBtn: $('attachBtn'),
       fileInput: $('fileInput'),
@@ -1264,7 +1260,6 @@
       }
     });
     
-    elements.uploadBtn.addEventListener('click', () => elements.fileInput.click());
     elements.attachBtn.addEventListener('click', () => elements.fileInput.click());
     
     elements.fileInput.addEventListener('change', (e) => {

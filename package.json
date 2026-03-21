@@ -1,6 +1,6 @@
 {
   "name": "datamind",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "智能数据分析助手 — 上传数据，用自然语言分析，无需 SQL/Python。支持 CSV/Excel 导入、自然语言查询、自动洞察分析和报告生成。",
   "main": "dist/cli/index.js",
   "bin": {
