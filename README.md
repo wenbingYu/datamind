@@ -108,6 +108,35 @@ Web UI 同时提供 RESTful API：
 - [安装指南](./docs/INSTALLATION.md) — 详细的安装步骤
 - [快速教程](./docs/QUICK_START.md) — 5 分钟上手
 
+## Docker
+
+### 使用 Docker Compose
+
+```bash
+# 设置环境变量
+export DATAMIND_API_KEY=your_api_key
+
+# 启动服务
+docker-compose up -d
+
+# 访问 Web UI
+open http://localhost:3000
+```
+
+### 使用 Docker
+
+```bash
+# 构建镜像
+docker build -t datamind .
+
+# 运行容器
+docker run -d \
+  -p 3000:3000 \
+  -e DATAMIND_API_KEY=your_api_key \
+  -v datamind-data:/data \
+  datamind
+```
+
 ## 开发
 
 ```bash
@@ -123,6 +152,12 @@ npm run build
 
 # 开发模式
 npm run dev
+
+# 运行测试
+npm test
+
+# 测试覆盖率
+npm run test:coverage
 ```
 
 ## 技术栈

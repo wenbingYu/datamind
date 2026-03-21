@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  datamind:
+    build: .
+    container_name: datamind
+    ports:
+      - "3000:3000"
+    volumes:
+      - datamind-data:/data
+      - ./examples:/app/examples:ro
+    environment:
+      - DATAMIND_API_KEY=${DATAMIND_API_KEY}
+      - ZHIPU_API_KEY=${ZHIPU_API_KEY}
+    restart: unless-stopped
+
+volumes:
+  datamind-data:
+    driver: local
