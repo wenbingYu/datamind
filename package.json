@@ -1,7 +1,7 @@
 {
   "name": "datamind",
   "version": "1.0.0",
-  "description": "**智能数据分析助手 — 上传数据，用自然语言分析，无需 SQL/Python**",
+  "description": "智能数据分析助手 — 上传数据，用自然语言分析，无需 SQL/Python。支持 CSV/Excel 导入、自然语言查询、自动洞察分析和报告生成。",
   "main": "dist/cli/index.js",
   "bin": {
     "datamind": "./dist/cli/index.js"
@@ -13,20 +13,42 @@
     "dev": "ts-node src/cli/index.ts",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --runInBand --coverage"
+    "test:coverage": "jest --runInBand --coverage",
+    "prepublishOnly": "npm run build && npm test"
   },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wenbingYu/datamind.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "data-analysis",
+    "natural-language",
+    "sql",
+    "duckdb",
+    "cli",
+    "ai",
+    "llm",
+    "rag",
+    "visualization",
+    "business-intelligence",
+    "nl2sql",
+    "data-science"
+  ],
+  "author": "wenbingYu",
+  "license": "MIT",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/wenbingYu/datamind/issues"
   },
   "homepage": "https://github.com/wenbingYu/datamind#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
