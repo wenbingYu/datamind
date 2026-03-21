@@ -4,6 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/datamind.svg)](https://www.npmjs.com/package/datamind)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/wenbingYu/datamind.svg?style=social)](https://github.com/wenbingYu/datamind/stargazers)
 
 ## 功能特性
 
@@ -51,7 +52,7 @@ datamind ui
 
 ```bash
 # 克隆仓库
-git clone https://github.com/wembing/datamind.git
+git clone https://github.com/wenbingYu/datamind.git
 cd datamind
 
 # 安装依赖
