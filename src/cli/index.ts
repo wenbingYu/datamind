@@ -5,6 +5,9 @@ import chalk from 'chalk';
 import { importCommand } from './commands/import';
 import { listCommand } from './commands/list';
 import { askCommand } from './commands/ask';
+import { analyzeCommand } from './commands/analyze';
+import { exportCommand } from './commands/export';
+import { uiCommand } from './commands/ui';
 
 const program = new Command();
 
@@ -34,8 +37,38 @@ program
   .command('ask <question>')
   .description('用自然语言查询数据')
   .option('-t, --table <name>', '指定查询的表名')
-  .action(async (question: string, options: { table?: string }) => {
-    await askCommand(question, options.table);
+  .option('-c, --chart <type>', '生成图表 (bar, line, pie, scatter)')
+  .option('-o, --output <file>', '输出文件路径 (保存图表)')
+  .action(async (question: string, options: { table?: string; chart?: string; output?: string }) => {
+    await askCommand(question, options.table, options.chart, options.output);
+  });
+
+// datamind analyze [table]
+program
+  .command('analyze [table]')
+  .description('分析数据表并生成洞察')
+  .action(async (table?: string) => {
+    await analyzeCommand(table);
+  });
+
+// datamind export <file>
+program
+  .command('export <file>')
+  .description('导出分析报告 (支持 .md, .html, .json)')
+  .option('-t, --title <title>', '报告标题')
+  .option('--table <name>', '指定导出的表')
+  .option('--template <name>', '报告模板')
+  .action(async (file: string, options: { title?: string; table?: string; template?: string }) => {
+    await exportCommand(file, options);
+  });
+
+// datamind ui
+program
+  .command('ui')
+  .description('启动 Web UI 界面')
+  .option('-p, --port <port>', '端口号', '3000')
+  .action(async (options: { port: string }) => {
+    await uiCommand(parseInt(options.port));
   });
 
 // Parse arguments
@@ -52,6 +85,9 @@ if (!process.argv.slice(2).length) {
   console.log(chalk.dim('    datamind import sales.csv    导入数据'));
   console.log(chalk.dim('    datamind list                查看数据表'));
   console.log(chalk.dim('    datamind ask "销售额最高的产品"  查询数据'));
+  console.log(chalk.dim('    datamind analyze sales       分析数据'));
+  console.log(chalk.dim('    datamind export report.md    导出报告'));
+  console.log(chalk.dim('    datamind ui                  启动 Web 界面'));
   console.log();
   program.outputHelp();
 }

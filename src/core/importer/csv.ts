@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ColumnMeta, TableMeta } from '../../types';
 import { executeSQL, tableExists, getTableMeta, getDatabase } from '../engine/duckdb';
+import { indexTableSchema } from '../engine/lancedb';
 
 interface ParseResult {
   headers: string[];
@@ -171,6 +172,13 @@ export async function importCSV(filePath: string, tableName?: string): Promise<T
   const meta = await getTableMeta(name);
   if (!meta) {
     throw new Error('导入失败：无法获取表元数据');
+  }
+  
+  // 为表 schema 建立向量索引
+  try {
+    await indexTableSchema(meta.name, meta.columns);
+  } catch {
+    // 忽略索引错误
   }
   
   return meta;

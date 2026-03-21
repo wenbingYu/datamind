@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataMind - 智能数据分析助手</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5a67d8;
+      --success: #48bb78;
+      --warning: #ed8936;
+      --danger: #f56565;
+      --bg: #f7fafc;
+      --card-bg: #ffffff;
+      --text: #2d3748;
+      --text-light: #718096;
+      --border: #e2e8f0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    /* 布局 */
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* 侧边栏 */
+    .sidebar {
+      width: 280px;
+      background: white;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .logo {
+      font-size: 1.5em;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+    }
+    
+    .section-title {
+      font-size: 0.75em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-light);
+      margin-bottom: 10px;
+    }
+    
+    .table-list {
+      list-style: none;
+    }
+    
+    .table-item {
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+    
+    .table-item:hover {
+      background: var(--bg);
+    }
+    
+    .table-item.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .table-item-name {
+      font-weight: 500;
+    }
+    
+    .table-item-meta {
+      font-size: 0.8em;
+      color: var(--text-light);
+    }
+    
+    .table-item.active .table-item-meta {
+      color: rgba(255,255,255,0.8);
+    }
+    
+    /* 主内容 */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* 头部 */
+    .header {
+      background: white;
+      padding: 20px 30px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .search-box {
+      flex: 1;
+      position: relative;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 12px 20px;
+      font-size: 1em;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .search-input:focus {
+      border-color: var(--primary);
+    }
+    
+    .search-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 8px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .search-btn:hover {
+      background: var(--primary-dark);
+    }
+    
+    .search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    /* 内容区 */
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+    
+    /* 卡片 */
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    
+    .card-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    /* 表格 */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .data-table th,
+    .data-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .data-table th {
+      background: var(--bg);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    
+    .data-table tr:hover td {
+      background: var(--bg);
+    }
+    
+    .table-container {
+      max-height: 400px;
+      overflow: auto;
+    }
+    
+    /* SQL 显示 */
+    .sql-display {
+      background: #1a202c;
+      color: #a0aec0;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin-bottom: 15px;
+    }
+    
+    .sql-keyword {
+      color: #63b3ed;
+    }
+    
+    .sql-string {
+      color: #68d391;
+    }
+    
+    .sql-number {
+      color: #f6ad55;
+    }
+    
+    /* 洞察卡片 */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 15px;
+    }
+    
+    .insight-card {
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+    
+    .insight-card.high {
+      background: #fff5f5;
+      border-color: var(--danger);
+    }
+    
+    .insight-card.medium {
+      background: #fffaf0;
+      border-color: var(--warning);
+    }
+    
+    .insight-card.low {
+      background: var(--bg);
+      border-color: var(--text-light);
+    }
+    
+    .insight-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .insight-desc {
+      font-size: 0.9em;
+      color: var(--text-light);
+    }
+    
+    /* 统计卡片 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    
+    .stat-value {
+      font-size: 2em;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.85em;
+    }
+    
+    /* 图表 */
+    .chart-container {
+      height: 300px;
+      margin: 20px 0;
+    }
+    
+    /* 标签 */
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75em;
+      font-weight: 500;
+    }
+    
+    .tag.primary { background: #e9d8fd; color: #6b46c1; }
+    .tag.success { background: #c6f6d5; color: #276749; }
+    .tag.warning { background: #feebc8; color: #c05621; }
+    .tag.danger { background: #fed7d7; color: #c53030; }
+    
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+    }
+    
+    .empty-icon {
+      font-size: 4em;
+      margin-bottom: 20px;
+    }
+    
+    /* 加载状态 */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    /* 上传区域 */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--primary);
+      background: var(--bg);
+    }
+    
+    .upload-icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 5px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95em;
+      color: var(--text-light);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .tab:hover {
+      color: var(--text);
+    }
+    
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      background: #1a202c;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .toast.success {
+      background: var(--success);
+    }
+    
+    .toast.error {
+      background: var(--danger);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">📊 DataMind</div>
+      </div>
+      <div class="sidebar-content">
+        <div class="section-title">数据表</div>
+        <ul class="table-list" id="tableList">
+          <!-- 动态加载 -->
+        </ul>
+      </div>
+    </aside>
+    
+    <!-- 主内容 -->
+    <main class="main">
+      <!-- 头部 -->
+      <header class="header">
+        <div class="search-box">
+          <input type="text" class="search-input" id="questionInput" 
+                 placeholder="输入问题，例如：销售额最高的产品是哪个？">
+          <button class="search-btn" id="askBtn">查询</button>
+        </div>
+      </header>
+      
+      <!-- 内容区 -->
+      <div class="content" id="content">
+        <!-- 默认显示上传页面 -->
+        <div id="homeView">
+          <div class="card">
+            <div class="card-header">
+              <span>📁 导入数据</span>
+            </div>
+            <div class="card-body">
+              <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">📤</div>
+                <p>拖放 CSV 文件到此处，或点击选择文件</p>
+                <input type="file" id="fileInput" accept=".csv" style="display: none;">
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <span>🚀 快速开始</span>
+            </div>
+            <div class="card-body">
+              <p>1. 导入 CSV 文件到 DataMind</p>
+              <p>2. 使用自然语言查询数据，例如：</p>
+              <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-light);">
+                <li>"销售额最高的产品是什么？"</li>
+                <li>"最近 7 天的趋势如何？"</li>
+                <li>"各地区的销售额对比"</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 查询结果视图 -->
+        <div id="resultView" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <span>📝 SQL 查询</span>
+              <span id="execTime"></span>
+            </div>
+            <div class="card-body">
+              <pre class="sql-display" id="sqlDisplay"></pre>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <span>📊 查询结果</span>
+              <span id="rowCount"></span>
+            </div>
+            <div class="card-body">
+              <div class="tabs">
+                <button class="tab active" data-tab="table">表格</button>
+                <button class="tab" data-tab="chart">图表</button>
+              </div>
+              
+              <div id="tableView">
+                <div class="table-container">
+                  <table class="data-table" id="resultTable">
+                    <thead id="resultHead"></thead>
+                    <tbody id="resultBody"></tbody>
+                  </table>
+                </div>
+              </div>
+              
+              <div id="chartView" style="display: none;">
+                <div class="chart-container" id="chart"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 表详情视图 -->
+        <div id="tableDetailView" style="display: none;">
+          <div class="stats-grid" id="tableStats"></div>
+          
+          <div class="card">
+            <div class="card-header">
+              <span>📋 列信息</span>
+            </div>
+            <div class="card-body">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>列名</th>
+                    <th>类型</th>
+                    <th>示例值</th>
+                  </tr>
+                </thead>
+                <tbody id="columnsBody"></tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <span>💡 洞察</span>
+            </div>
+            <div class="card-body">
+              <div id="insightsContainer" class="insights-grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+  <script>
+    // API 调用
+    const API = {
+      async getTables() {
+        const res = await fetch('/api/tables');
+        return res.json();
+      },
+      
+      async ask(question, table) {
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, table })
+        });
+        return res.json();
+      },
+      
+      async analyze(table) {
+        const res = await fetch(`/api/analyze/${encodeURIComponent(table)}`);
+        return res.json();
+      },
+      
+      async importCSV(data, name) {
+        const res = await fetch('/api/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data, name })
+        });
+        return res.json();
+      }
+    };
+    
+    // 状态
+    let state = {
+      tables: [],
+      currentTable: null,
+      currentResult: null
+    };
+    
+    // DOM 元素
+    const elements = {
+      tableList: document.getElementById('tableList'),
+      questionInput: document.getElementById('questionInput'),
+      askBtn: document.getElementById('askBtn'),
+      content: document.getElementById('content'),
+      homeView: document.getElementById('homeView'),
+      resultView: document.getElementById('resultView'),
+      tableDetailView: document.getElementById('tableDetailView'),
+      sqlDisplay: document.getElementById('sqlDisplay'),
+      resultTable: document.getElementById('resultTable'),
+      resultHead: document.getElementById('resultHead'),
+      resultBody: document.getElementById('resultBody'),
+      rowCount: document.getElementById('rowCount'),
+      execTime: document.getElementById('execTime'),
+      uploadZone: document.getElementById('uploadZone'),
+      fileInput: document.getElementById('fileInput'),
+      tableStats: document.getElementById('tableStats'),
+      columnsBody: document.getElementById('columnsBody'),
+      insightsContainer: document.getElementById('insightsContainer'),
+      toast: document.getElementById('toast'),
+      chart: document.getElementById('chart')
+    };
+    
+    // 加载表列表
+    async function loadTables() {
+      const result = await API.getTables();
+      if (result.success) {
+        state.tables = result.data;
+        renderTableList();
+      }
+    }
+    
+    // 渲染表列表
+    function renderTableList() {
+      if (state.tables.length === 0) {
+        elements.tableList.innerHTML = '<li style="padding: 10px; color: var(--text-light);">暂无数据表</li>';
+        return;
+      }
+      
+      elements.tableList.innerHTML = state.tables.map(t => `
+        <li class="table-item ${state.currentTable === t.name ? 'active' : ''}" data-table="${t.name}">
+          <div class="table-item-name">${t.name}</div>
+          <div class="table-item-meta">${t.rowCount.toLocaleString()} 行 · ${t.columns.length} 列</div>
+        </li>
+      `).join('');
+      
+      // 绑定点击事件
+      elements.tableList.querySelectorAll('.table-item').forEach(item => {
+        item.addEventListener('click', () => showTableDetail(item.dataset.table));
+      });
+    }
+    
+    // 显示表详情
+    async function showTableDetail(tableName) {
+      state.currentTable = tableName;
+      renderTableList();
+      
+      elements.homeView.style.display = 'none';
+      elements.resultView.style.display = 'none';
+      elements.tableDetailView.style.display = 'block';
+      
+      const table = state.tables.find(t => t.name === tableName);
+      if (!table) return;
+      
+      // 统计卡片
+      elements.tableStats.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${table.rowCount.toLocaleString()}</div>
+          <div class="stat-label">行数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${table.columns.length}</div>
+          <div class="stat-label">列数</div>
+        </div>
+      `;
+      
+      // 列信息
+      elements.columnsBody.innerHTML = table.columns.map(col => `
+        <tr>
+          <td><strong>${col.name}</strong></td>
+          <td><span class="tag primary">${col.type}</span></td>
+          <td>${(col.sampleValues || []).slice(0, 3).join(', ') || '-'}</td>
+        </tr>
+      `).join('');
+      
+      // 分析
+      const analyzeResult = await API.analyze(tableName);
+      if (analyzeResult.success) {
+        renderInsights(analyzeResult.data.insights);
+      }
+    }
+    
+    // 渲染洞察
+    function renderInsights(insights) {
+      if (!insights || insights.length === 0) {
+        elements.insightsContainer.innerHTML = '<p style="color: var(--text-light);">暂无明显洞察</p>';
+        return;
+      }
+      
+      const typeIcons = {
+        trend: '📈',
+        anomaly: '⚠️',
+        correlation: '🔗',
+        distribution: '📊'
+      };
+      
+      elements.insightsContainer.innerHTML = insights.map(insight => `
+        <div class="insight-card ${insight.significance}">
+          <div class="insight-title">${typeIcons[insight.type] || '📌'} ${insight.title}</div>
+          <div class="insight-desc">${insight.description}</div>
+        </div>
+      `).join('');
+    }
+    
+    // 执行查询
+    async function executeQuery() {
+      const question = elements.questionInput.value.trim();
+      if (!question) return;
+      
+      elements.askBtn.disabled = true;
+      elements.askBtn.textContent = '查询中...';
+      
+      try {
+        const result = await API.ask(question, state.currentTable);
+        
+        if (!result.success) {
+          showToast(result.error, 'error');
+          return;
+        }
+        
+        state.currentResult = result.data;
+        
+        // 显示结果视图
+        elements.homeView.style.display = 'none';
+        elements.tableDetailView.style.display = 'none';
+        elements.resultView.style.display = 'block';
+        
+        // SQL
+        elements.sqlDisplay.textContent = result.data.sql;
+        
+        // 执行时间
+        elements.execTime.textContent = `执行时间: ${result.data.executionTime}ms`;
+        
+        // 行数
+        elements.rowCount.textContent = `${result.data.rowCount} 行`;
+        
+        // 表格
+        renderResultTable(result.data);
+        
+        // 图表
+        renderChart(result.data);
+        
+      } catch (error) {
+        showToast('查询失败: ' + error.message, 'error');
+      } finally {
+        elements.askBtn.disabled = false;
+        elements.askBtn.textContent = '查询';
+      }
+    }
+    
+    // 渲染结果表格
+    function renderResultTable(data) {
+      if (data.rows.length === 0) {
+        elements.resultHead.innerHTML = '';
+        elements.resultBody.innerHTML = '<tr><td colspan="100" style="text-align: center; color: var(--text-light);">无数据</td></tr>';
+        return;
+      }
+      
+      elements.resultHead.innerHTML = `<tr>${data.columns.map(c => `<th>${c}</th>`).join('')}</tr>`;
+      elements.resultBody.innerHTML = data.rows.slice(0, 100).map(row => `
+        <tr>${data.columns.map(c => `<td>${formatValue(row[c])}</td>`).join('')}</tr>
+      `).join('');
+    }
+    
+    // 格式化值
+    function formatValue(val) {
+      if (val === null || val === undefined) return '<span style="color: var(--text-light);">NULL</span>';
+      if (typeof val === 'number') return val.toLocaleString();
+      return String(val);
+    }
+    
+    // 渲染图表
+    function renderChart(data) {
+      if (data.rows.length === 0) return;
+      
+      const xCol = data.columns[0];
+      const yCol = data.columns[1] || data.columns[0];
+      
+      const chart = echarts.init(elements.chart);
+      
+      chart.setOption({
+        tooltip: { trigger: 'axis' },
+        xAxis: {
+          type: 'category',
+          data: data.rows.slice(0, 20).map(r => r[xCol])
+        },
+        yAxis: { type: 'value' },
+        series: [{
+          type: 'bar',
+          data: data.rows.slice(0, 20).map(r => r[yCol]),
+          itemStyle: { color: '#667eea' }
+        }]
+      });
+    }
+    
+    // 文件上传
+    async function handleFileUpload(file) {
+      if (!file.name.endsWith('.csv')) {
+        showToast('只支持 CSV 文件', 'error');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const data = e.target.result;
+        const name = file.name.replace('.csv', '');
+        
+        showToast('正在导入...', 'info');
+        
+        const result = await API.importCSV(data, name);
+        
+        if (result.success) {
+          showToast(`导入成功: ${result.data.rowCount} 行`, 'success');
+          await loadTables();
+        } else {
+          showToast('导入失败: ' + result.error, 'error');
+        }
+      };
+      
+      reader.readAsText(file);
+    }
+    
+    // Toast
+    function showToast(message, type = 'info') {
+      elements.toast.textContent = message;
+      elements.toast.className = `toast ${type} show`;
+      
+      setTimeout(() => {
+        elements.toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Tab 切换
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const tabName = tab.dataset.tab;
+        document.getElementById('tableView').style.display = tabName === 'table' ? 'block' : 'none';
+        document.getElementById('chartView').style.display = tabName === 'chart' ? 'block' : 'none';
+        
+        if (tabName === 'chart' && state.currentResult) {
+          renderChart(state.currentResult);
+        }
+      });
+    });
+    
+    // 事件绑定
+    elements.askBtn.addEventListener('click', executeQuery);
+    elements.questionInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') executeQuery();
+    });
+    
+    elements.uploadZone.addEventListener('click', () => elements.fileInput.click());
+    elements.fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+    });
+    
+    elements.uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      elements.uploadZone.classList.add('dragover');
+    });
+    elements.uploadZone.addEventListener('dragleave', () => {
+      elements.uploadZone.classList.remove('dragover');
+    });
+    elements.uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      elements.uploadZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
+    });
+    
+    // 初始化
+    loadTables();
+  </script>
+</body>
+</html>

@@ -69,7 +69,9 @@ export async function getTableMeta(tableName: string): Promise<TableMeta | null>
   
   // Get row count
   const countResult = await database.all(`SELECT COUNT(*) as count FROM "${tableName}"`);
-  const rowCount = countResult[0]?.count || 0;
+  const rowCount = typeof countResult[0]?.count === 'bigint' 
+    ? Number(countResult[0].count) 
+    : (countResult[0]?.count || 0);
   
   // Get column info
   const columnsResult = await database.all(
