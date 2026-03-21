@@ -1,8 +1,31 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import ora from 'ora';
 import { ColumnMeta, TableMeta } from '../../types';
 import { executeSQL, tableExists, getTableMeta, getDatabase } from '../engine/duckdb';
 import { indexTableSchema } from '../engine/lancedb';
+
+/**
+ * 验证表名，只允许字母、数字、下划线
+ */
+function validateTableName(name: string): string {
+  const sanitized = name.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  if (sanitized.length === 0) {
+    throw new Error('无效的表名');
+  }
+  return sanitized;
+}
+
+/**
+ * 验证列名，只允许字母、数字、下划线
+ */
+function validateColumnName(name: string): string {
+  const sanitized = name.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  if (sanitized.length === 0) {
+    throw new Error('无效的列名');
+  }
+  return sanitized;
+}
 
 interface ParseResult {
   headers: string[];
@@ -122,10 +145,15 @@ function getDuckDBType(type: ColumnMeta['type']): string {
 }
 
 export async function importCSV(filePath: string, tableName?: string): Promise<TableMeta> {
-  const name = tableName || path.basename(filePath, '.csv').toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  // 验证并清理表名
+  const rawName = tableName || path.basename(filePath, '.csv');
+  const name = validateTableName(rawName);
   
   // Parse CSV
   const { headers, rows, columnTypes } = await parseCSV(filePath);
+  
+  // 验证并清理列名
+  const validatedHeaders = headers.map(h => validateColumnName(h));
   
   // Check if table exists
   const exists = await tableExists(name);
@@ -135,37 +163,51 @@ export async function importCSV(filePath: string, tableName?: string): Promise<T
   }
   
   // Create table
-  const columnDefs = headers.map(h => {
-    const type = columnTypes.get(h) || 'string';
+  const columnDefs = validatedHeaders.map((h, i) => {
+    const type = columnTypes.get(headers[i]) || 'string';
     return `"${h}" ${getDuckDBType(type)}`;
   }).join(', ');
   
   await executeSQL(`CREATE TABLE "${name}" (${columnDefs})`);
   
-  // Insert data
+  // Insert data using parameterized queries
   if (rows.length > 0) {
-    // Batch insert using direct SQL for better compatibility
+    const db = await getDatabase();
+    const placeholders = validatedHeaders.map(() => '?').join(', ');
+    const stmt = await db.prepare(`INSERT INTO "${name}" VALUES (${placeholders})`);
+    
+    const spinner = ora('导入中...').start();
+    let processed = 0;
+    
     for (const row of rows) {
       const values = row.map((v, i) => {
         const type = columnTypes.get(headers[i]);
-        if (v === '' || v === null || v === undefined) return 'NULL';
+        if (v === '' || v === null || v === undefined) return null;
         
         switch (type) {
           case 'number':
             return Number(v);
           case 'boolean':
             const lower = v.toLowerCase();
-            return lower === 'true' || lower === 'yes' || lower === '1' ? 'TRUE' : 'FALSE';
+            return lower === 'true' || lower === 'yes' || lower === '1';
           case 'date':
-            return `'${v}'`;
+            return v; // DuckDB will handle date string
           default:
-            // Escape single quotes
-            return `'${v.replace(/'/g, "''")}'`;
+            return v;
         }
-      }).join(', ');
+      });
       
-      await executeSQL(`INSERT INTO "${name}" VALUES (${values})`);
+      await stmt.run(...values);
+      processed++;
+      
+      // Update progress every 100 rows
+      if (processed % 100 === 0) {
+        const progress = Math.round((processed / rows.length) * 100);
+        spinner.text = `导入中... ${progress}% (${processed}/${rows.length})`;
+      }
     }
+    
+    spinner.succeed(`导入完成，共 ${rows.length} 行`);
   }
   
   // Get table metadata

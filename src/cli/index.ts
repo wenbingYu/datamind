@@ -2,12 +2,37 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { DataMindError, ConfigError } from '../utils/errors';
 import { importCommand } from './commands/import';
 import { listCommand } from './commands/list';
 import { askCommand } from './commands/ask';
 import { analyzeCommand } from './commands/analyze';
 import { exportCommand } from './commands/export';
 import { uiCommand } from './commands/ui';
+
+// 全局错误处理
+process.on('uncaughtException', (error: Error) => {
+  if (error instanceof DataMindError) {
+    // 已知错误类型，已在具体位置输出信息
+    process.exit(error.exitCode);
+  } else {
+    console.error(chalk.red('未预期的错误:'), error.message);
+    console.error(chalk.dim(error.stack || ''));
+    process.exit(1);
+  }
+});
+
+process.on('unhandledRejection', (reason: unknown) => {
+  if (reason instanceof DataMindError) {
+    process.exit(reason.exitCode);
+  } else if (reason instanceof Error) {
+    console.error(chalk.red('未预期的错误:'), reason.message);
+    console.error(chalk.dim(reason.stack || ''));
+  } else {
+    console.error(chalk.red('未预期的错误:'), String(reason));
+  }
+  process.exit(1);
+});
 
 const program = new Command();
 

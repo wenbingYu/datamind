@@ -3,7 +3,7 @@ import ora from 'ora';
 import { getAllTablesMeta, executeSQLWithTime } from '../../core/engine/duckdb';
 import { getLLMClient } from '../../core/llm/client';
 import { SQLBuilder } from '../../core/llm/sql-builder';
-import { getConfig } from '../../utils/config';
+import { getConfig, validateConfig } from '../../utils/config';
 import { formatQueryResult } from '../../utils/output';
 import { 
   generateChartConfig, 
@@ -14,6 +14,7 @@ import {
   ChartType 
 } from '../../utils/charts';
 import { recommendTables } from '../../core/engine/lancedb';
+import { QueryError } from '../../utils/errors';
 
 export async function askCommand(
   question: string, 
@@ -23,11 +24,8 @@ export async function askCommand(
 ): Promise<void> {
   const config = getConfig();
   
-  if (!config.llm.apiKey) {
-    console.error(chalk.red('错误: 未配置 API Key'));
-    console.log(chalk.dim('请设置环境变量 DATAMIND_API_KEY 或 ZHIPU_API_KEY'));
-    process.exit(1);
-  }
+  // 提前验证 API Key 配置
+  validateConfig(config);
 
   // Get table metadata
   let tables = await getAllTablesMeta();
@@ -148,7 +146,9 @@ export async function askCommand(
 
   } catch (error) {
     spinner.fail(chalk.red('查询失败'));
-    console.error(chalk.red(error instanceof Error ? error.message : String(error)));
-    process.exit(1);
+    if (error instanceof QueryError) {
+      throw error;
+    }
+    throw new QueryError(error instanceof Error ? error.message : String(error));
   }
 }

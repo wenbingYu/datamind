@@ -1,7 +1,9 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
+import chalk from 'chalk';
 import { Config } from '../types';
+import { ConfigError } from './errors';
 
 const DEFAULT_DATA_DIR = path.join(os.homedir(), '.datamind');
 
@@ -21,6 +23,25 @@ export function getConfig(): Config {
       lancedbPath: path.join(DEFAULT_DATA_DIR, 'lancedb')
     }
   };
+}
+
+/**
+ * 验证配置是否有效
+ * 检查 API Key 是否已配置，未配置时显示友好的错误提示并退出
+ */
+export function validateConfig(config: Config): void {
+  if (!config.llm.apiKey) {
+    console.error();
+    console.error(chalk.red('错误: 未配置 API Key'));
+    console.log();
+    console.log('请设置环境变量:');
+    console.log(chalk.cyan('  export DATAMIND_API_KEY=your_api_key'));
+    console.log();
+    console.log('或者在 ~/.zshrc 或 ~/.bashrc 中添加:');
+    console.log(chalk.cyan('  export DATAMIND_API_KEY=your_api_key'));
+    console.log();
+    throw new ConfigError('未配置 API Key');
+  }
 }
 
 export function ensureDataDir(): void {
