@@ -24,13 +24,29 @@
 npm install -g datamind
 ```
 
+### 首次配置
+
+首次使用时，运行配置向导：
+
+```bash
+datamind setup
+```
+
+按照提示选择 AI 服务商并输入 API Key：
+- 阿里云百炼（推荐，国内快）
+- 智谱 AI
+- DeepSeek
+- OpenAI
+
+> 💡 **数据安全**: API Key 保存在本地，不会上传到云端。所有数据处理都在本地完成。
+
 ### 使用
 
 ```bash
 # 导入数据
 datamind import sales.csv
 
-# 查询数据
+# 用自然语言查询
 datamind ask "上个月销售额最高的 Top 10 产品"
 
 # 自动分析

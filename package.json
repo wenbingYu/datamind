@@ -1,14 +1,14 @@
 {
   "name": "datamind",
-  "version": "1.1.0",
-  "description": "智能数据分析助手 — 上传数据，用自然语言分析，无需 SQL/Python。支持 CSV/Excel 导入、自然语言查询、自动洞察分析和报告生成。",
+  "version": "2.1.0",
+  "description": "智能数据分析助手 — 上传数据，用自然语言分析，无需 SQL/Python。支持 CSV/Excel 导入、自然语言查询、自动洞察分析、高级图表、时间序列预测、异常检测、关联分析。本地优先，数据不出域。首次配置向导，无需懂 API Key。",
   "main": "dist/cli/index.js",
   "bin": {
     "datamind": "./dist/cli/index.js"
   },
   "scripts": {
     "build": "tsc && npm run copy-public",
-    "copy-public": "mkdir -p dist/ui/public && cp src/ui/public/index.html dist/ui/public/",
+    "copy-public": "mkdir -p dist/ui/public && cp src/ui/public/*.html dist/ui/public/",
     "start": "ts-node src/cli/index.ts",
     "dev": "ts-node src/cli/index.ts",
     "test": "jest --runInBand",
@@ -61,6 +61,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@types/inquirer": "^9.0.9",
     "chalk": "^5.6.2",
     "cli-table3": "^0.6.5",
     "commander": "^14.0.3",
@@ -68,6 +69,7 @@
     "duckdb-async": "^1.4.2",
     "echarts": "^6.0.0",
     "express": "^5.2.1",
+    "inquirer": "^13.3.2",
     "marked": "^17.0.5",
     "multer": "^2.1.1",
     "openai": "^6.32.0",

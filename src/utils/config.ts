@@ -5,7 +5,8 @@ import chalk from 'chalk';
 import { Config } from '../types';
 import { ConfigError } from './errors';
 
-const DEFAULT_DATA_DIR = path.join(os.homedir(), '.datamind');
+// 支持自定义数据目录，默认 ~/.datamind
+const DEFAULT_DATA_DIR = process.env.DATAMIND_HOME || path.join(os.homedir(), '.datamind');
 
 export function getConfig(): Config {
   const apiKey = process.env.DATAMIND_API_KEY || process.env.ZHIPU_API_KEY || '';
