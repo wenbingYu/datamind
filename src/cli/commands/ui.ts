@@ -1,9 +1,11 @@
 import * as http from 'http';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 import chalk from 'chalk';
 import express from 'express';
 import cors from 'cors';
+import multer from 'multer';
 import { getAllTablesMeta, executeSQL, executeSQLWithTime, getTableMeta, dropTable, exportTableToCSV } from '../../core/engine/duckdb';
 import { getLLMClient } from '../../core/llm/client';
 import { SQLBuilder } from '../../core/llm/sql-builder';
@@ -13,6 +15,12 @@ import { indexTableSchema, recommendTables } from '../../core/engine/lancedb';
 import { importCSV } from '../../core/importer/csv';
 
 const PORT = 3000;
+
+// Configure multer for file uploads
+const upload = multer({ 
+  dest: os.tmpdir(),
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+});
 
 export async function uiCommand(port: number = PORT): Promise<void> {
   const app = express();
@@ -99,6 +107,152 @@ export async function uiCommand(port: number = PORT): Promise<void> {
           error: '请提供 file 或 data 参数'
         });
       }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  // POST /api/upload - 上传文件（form-data）
+  api.post('/upload', upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: '请选择文件'
+        });
+      }
+      
+      const originalName = req.file.originalname;
+      const tempPath = req.file.path;
+      
+      // 检查文件类型
+      if (!originalName.match(/\.(csv|xlsx|xls)$/i)) {
+        fs.unlinkSync(tempPath);
+        return res.status(400).json({
+          success: false,
+          error: '只支持 CSV、XLSX、XLS 格式'
+        });
+      }
+      
+      const name = originalName.replace(/\.(csv|xlsx|xls)$/i, '');
+      const meta = await importCSV(tempPath);
+      
+      // 建立索引
+      await indexTableSchema(meta.name, meta.columns);
+      
+      // 删除临时文件
+      fs.unlinkSync(tempPath);
+      
+      res.json({
+        success: true,
+        data: {
+          name: meta.name,
+          id: meta.name,
+          rowCount: meta.rowCount,
+          columns: meta.columns.length
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  // POST /api/chat - 对话式查询
+  api.post('/chat', async (req, res) => {
+    try {
+      const { messages, files } = req.body;
+      
+      if (!messages || messages.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: '请提供消息'
+        });
+      }
+      
+      const config = getConfig();
+      
+      // 验证 API Key 配置
+      try {
+        validateConfig(config);
+      } catch {
+        return res.status(400).json({
+          success: false,
+          error: '未配置 API Key，请设置 DATAMIND_API_KEY 或 ZHIPU_API_KEY 环境变量'
+        });
+      }
+      
+      // 获取最后一条用户消息
+      const lastMessage = messages.filter((m: any) => m.role === 'user').pop();
+      const question = lastMessage?.content || '';
+      
+      if (!question) {
+        return res.json({
+          success: true,
+          data: {
+            message: '请输入您的问题',
+            sql: '',
+            columns: [],
+            rows: [],
+            rowCount: 0
+          }
+        });
+      }
+      
+      // 获取表
+      let tables = await getAllTablesMeta();
+      
+      if (tables.length === 0) {
+        return res.json({
+          success: true,
+          data: {
+            message: '暂无数据表，请先上传数据文件',
+            sql: '',
+            columns: [],
+            rows: [],
+            rowCount: 0
+          }
+        });
+      }
+      
+      // 使用向量索引推荐表
+      const recommended = await recommendTables(question);
+      if (recommended.length > 0) {
+        tables = tables.filter(t => recommended.includes(t.name));
+        if (tables.length === 0) {
+          tables = await getAllTablesMeta();
+        }
+      }
+      
+      // 生成 SQL
+      const client = getLLMClient(config);
+      const builder = new SQLBuilder(client);
+      const sql = await builder.generateSQL(question, tables);
+      
+      // 执行查询
+      const { rows, time } = await executeSQLWithTime(sql);
+      
+      const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+      
+      // 生成分析摘要
+      let message = generateSummary(question, rows, columns);
+      
+      res.json({
+        success: true,
+        data: {
+          message,
+          sql,
+          columns,
+          rows: rows.slice(0, 1000),
+          rowCount: rows.length,
+          executionTime: time
+        }
+      });
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -327,6 +481,8 @@ export async function uiCommand(port: number = PORT): Promise<void> {
     console.log(chalk.dim('  API 端点:'));
     console.log(chalk.dim(`    GET  /api/tables        获取表列表`));
     console.log(chalk.dim(`    POST /api/import        导入数据`));
+    console.log(chalk.dim(`    POST /api/upload        上传文件`));
+    console.log(chalk.dim(`    POST /api/chat          对话式查询`));
     console.log(chalk.dim(`    POST /api/ask           自然语言查询`));
     console.log(chalk.dim(`    POST /api/query         执行 SQL`));
     console.log(chalk.dim(`    GET  /api/analyze/:table 分析表`));
@@ -355,4 +511,53 @@ export async function uiCommand(port: number = PORT): Promise<void> {
       process.exit(0);
     });
   });
+}
+
+// Generate summary for chat response
+function generateSummary(question: string, rows: any[], columns: string[]): string {
+  if (rows.length === 0) {
+    return '查询未返回任何结果，可能没有符合条件的数据。';
+  }
+  
+  const questionLower = question.toLowerCase();
+  
+  // Check for top N queries
+  const topMatch = questionLower.match(/top\s*(\d+)|前\s*(\d+)|(\d+)\s*(个|条|名)/);
+  if (topMatch) {
+    const n = parseInt(topMatch[1] || topMatch[2] || topMatch[3]) || 10;
+    return `查询返回了 ${rows.length} 条数据。以下是排名前 ${Math.min(n, rows.length)} 的结果：`;
+  }
+  
+  // Check for aggregation queries
+  if (questionLower.includes('总') || questionLower.includes('合计') || questionLower.includes('sum') || questionLower.includes('count')) {
+    if (rows.length === 1 && columns.length <= 3) {
+      const values = columns.map(c => `${c}: ${rows[0][c]}`).join(', ');
+      return `统计结果：${values}`;
+    }
+    return `统计查询返回 ${rows.length} 条结果。`;
+  }
+  
+  // Check for average queries
+  if (questionLower.includes('平均') || questionLower.includes('avg')) {
+    if (rows.length === 1 && columns.length <= 3) {
+      const values = columns.map(c => `${c}: ${rows[0][c]}`).join(', ');
+      return `平均统计结果：${values}`;
+    }
+    return `查询返回 ${rows.length} 条结果。`;
+  }
+  
+  // Check for max/min queries
+  if (questionLower.includes('最高') || questionLower.includes('最大') || questionLower.includes('max') ||
+      questionLower.includes('最低') || questionLower.includes('最小') || questionLower.includes('min')) {
+    if (rows.length === 1) {
+      return `查询结果：${columns.map(c => `${c}: ${rows[0][c]}`).join(', ')}`;
+    }
+    return `查询返回 ${rows.length} 条结果。`;
+  }
+  
+  // Default summary
+  if (rows.length <= 5) {
+    return `查询返回 ${rows.length} 条数据。`;
+  }
+  return `查询返回 ${rows.length} 条数据，以下是部分结果：`;
 }
