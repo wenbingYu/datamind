@@ -170,41 +170,46 @@ export async function importCSV(filePath: string, tableName?: string): Promise<T
   
   await executeSQL(`CREATE TABLE "${name}" (${columnDefs})`);
   
-  // Insert data using parameterized queries
+  // Insert data with batch insert for performance
   if (rows.length > 0) {
-    const db = await getDatabase();
-    const placeholders = validatedHeaders.map(() => '?').join(', ');
-    const stmt = await db.prepare(`INSERT INTO "${name}" VALUES (${placeholders})`);
-    
+    const BATCH_SIZE = 1000;
+    const totalBatches = Math.ceil(rows.length / BATCH_SIZE);
     const spinner = ora('导入中...').start();
-    let processed = 0;
     
-    for (const row of rows) {
-      const values = row.map((v, i) => {
-        const type = columnTypes.get(headers[i]);
-        if (v === '' || v === null || v === undefined) return null;
-        
-        switch (type) {
-          case 'number':
-            return Number(v);
-          case 'boolean':
-            const lower = v.toLowerCase();
-            return lower === 'true' || lower === 'yes' || lower === '1';
-          case 'date':
-            return v; // DuckDB will handle date string
-          default:
-            return v;
-        }
+    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      const start = batchIndex * BATCH_SIZE;
+      const end = Math.min(start + BATCH_SIZE, rows.length);
+      const batch = rows.slice(start, end);
+      
+      // Format values for batch insert
+      const valueRows = batch.map(row => {
+        const values = row.map((v, i) => {
+          const type = columnTypes.get(headers[i]);
+          if (v === '' || v === null || v === undefined) return 'NULL';
+          
+          switch (type) {
+            case 'number':
+              return Number(v);
+            case 'boolean':
+              const lower = v.toLowerCase();
+              return lower === 'true' || lower === 'yes' || lower === '1' ? 'TRUE' : 'FALSE';
+            case 'date':
+              return `'${v}'`;
+            default:
+              // Escape single quotes
+              return `'${v.replace(/'/g, "''")}'`;
+          }
+        });
+        return `(${values.join(', ')})`;
       });
       
-      await stmt.run(...values);
-      processed++;
+      // Batch insert: INSERT INTO table VALUES (row1), (row2), ...
+      const valuesClause = valueRows.join(', ');
+      await executeSQL(`INSERT INTO "${name}" VALUES ${valuesClause}`);
       
-      // Update progress every 100 rows
-      if (processed % 100 === 0) {
-        const progress = Math.round((processed / rows.length) * 100);
-        spinner.text = `导入中... ${progress}% (${processed}/${rows.length})`;
-      }
+      // Update progress
+      const progress = Math.round(((batchIndex + 1) / totalBatches) * 100);
+      spinner.text = `导入中... ${progress}% (${end}/${rows.length})`;
     }
     
     spinner.succeed(`导入完成，共 ${rows.length} 行`);
