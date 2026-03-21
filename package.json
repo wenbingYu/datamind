@@ -1,0 +1,42 @@
+{
+  "name": "datamind",
+  "version": "1.0.0",
+  "description": "**智能数据分析助手 — 上传数据，用自然语言分析，无需 SQL/Python**",
+  "main": "dist/cli/index.js",
+  "bin": {
+    "datamind": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/cli/index.ts",
+    "dev": "ts-node src/cli/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wenbingYu/datamind.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/wenbingYu/datamind/issues"
+  },
+  "homepage": "https://github.com/wenbingYu/datamind#readme",
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.3",
+    "duckdb-async": "^1.4.2",
+    "echarts": "^6.0.0",
+    "marked": "^17.0.5",
+    "openai": "^6.32.0",
+    "ora": "^9.3.0"
+  }
+}
