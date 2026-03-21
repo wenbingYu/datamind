@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+*.tsbuildinfo
+
+# Data (用户数据不上传)
+data/
+*.csv
+*.xlsx
+*.parquet
+
+# Database
+*.duckdb
+*.db
+
+# Config (可能包含 API key)
+.env
+.env.local
+config.local.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Test
+coverage/
+
+# Temp
+tmp/
+temp/
