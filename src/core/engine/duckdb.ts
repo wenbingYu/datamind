@@ -126,3 +126,41 @@ export async function getAllTablesMeta(): Promise<TableMeta[]> {
   
   return metas;
 }
+
+export async function dropTable(tableName: string): Promise<void> {
+  const database = await getDatabase();
+  await database.all(`DROP TABLE IF EXISTS "${tableName}"`);
+}
+
+export async function exportTableToCSV(tableName: string): Promise<string> {
+  const database = await getDatabase();
+  
+  // Check if table exists
+  const exists = await tableExists(tableName);
+  if (!exists) {
+    throw new Error(`表 "${tableName}" 不存在`);
+  }
+  
+  // Get all data
+  const rows = await database.all(`SELECT * FROM "${tableName}"`);
+  
+  if (rows.length === 0) {
+    return '';
+  }
+  
+  // Get column names
+  const columns = Object.keys(rows[0]);
+  
+  // Convert to CSV
+  const header = columns.map(c => `"${c.replace(/"/g, '""')}"`).join(',');
+  const dataLines = rows.map(row => {
+    return columns.map(col => {
+      const val = row[col];
+      if (val === null || val === undefined) return '';
+      if (typeof val === 'string') return `"${val.replace(/"/g, '""')}"`;
+      return String(val);
+    }).join(',');
+  });
+  
+  return [header, ...dataLines].join('\n');
+}

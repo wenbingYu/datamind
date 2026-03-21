@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import chalk from 'chalk';
 import express from 'express';
 import cors from 'cors';
-import { getAllTablesMeta, executeSQL, executeSQLWithTime, getTableMeta } from '../../core/engine/duckdb';
+import { getAllTablesMeta, executeSQL, executeSQLWithTime, getTableMeta, dropTable, exportTableToCSV } from '../../core/engine/duckdb';
 import { getLLMClient } from '../../core/llm/client';
 import { SQLBuilder } from '../../core/llm/sql-builder';
 import { getConfig, validateConfig } from '../../utils/config';
@@ -256,6 +256,51 @@ export async function uiCommand(port: number = PORT): Promise<void> {
       res.json({
         success: true,
         data: meta
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  // GET /api/export/:table - 导出表数据
+  api.get('/export/:table', async (req, res) => {
+    try {
+      const { table } = req.params;
+      const csv = await exportTableToCSV(table);
+      
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${table}.csv"`);
+      res.send(csv);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  // DELETE /api/tables/:table - 删除表
+  api.delete('/tables/:table', async (req, res) => {
+    try {
+      const { table } = req.params;
+      
+      // 检查表是否存在
+      const meta = await getTableMeta(table);
+      if (!meta) {
+        return res.status(404).json({
+          success: false,
+          error: `表 "${table}" 不存在`
+        });
+      }
+      
+      await dropTable(table);
+      
+      res.json({
+        success: true,
+        message: `表 "${table}" 已删除`
       });
     } catch (error) {
       res.status(500).json({

@@ -9,342 +9,430 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     :root {
-      --primary: #667eea;
-      --primary-dark: #5a67d8;
-      --success: #48bb78;
-      --warning: #ed8936;
-      --danger: #f56565;
-      --bg: #f7fafc;
-      --card-bg: #ffffff;
-      --text: #2d3748;
-      --text-light: #718096;
-      --border: #e2e8f0;
+      /* Dark theme colors - OpenClaw inspired */
+      --bg-primary: #0f0f0f;
+      --bg-secondary: #1a1a1a;
+      --bg-tertiary: #242424;
+      --bg-hover: #2a2a2a;
+      --border-color: #333;
+      --text-primary: #f0f0f0;
+      --text-secondary: #a0a0a0;
+      --text-muted: #666;
+      --accent: #6366f1;
+      --accent-hover: #5558e3;
+      --accent-glow: rgba(99, 102, 241, 0.3);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
     }
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg-primary);
+      color: var(--text-primary);
       line-height: 1.6;
-    }
-    
-    /* 布局 */
-    .app {
-      display: flex;
       min-height: 100vh;
     }
     
-    /* 侧边栏 */
-    .sidebar {
-      width: 280px;
-      background: white;
-      border-right: 1px solid var(--border);
+    /* Header */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
       display: flex;
-      flex-direction: column;
-    }
-    
-    .sidebar-header {
-      padding: 20px;
-      border-bottom: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     
     .logo {
-      font-size: 1.5em;
+      font-size: 1.25em;
       font-weight: 700;
-      color: var(--primary);
+      color: var(--accent);
       display: flex;
       align-items: center;
       gap: 8px;
     }
     
-    .sidebar-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 15px;
+    .header-actions {
+      display: flex;
+      gap: 12px;
     }
     
-    .section-title {
-      font-size: 0.75em;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-light);
-      margin-bottom: 10px;
-    }
-    
-    .table-list {
-      list-style: none;
-    }
-    
-    .table-item {
-      padding: 10px 12px;
-      border-radius: 8px;
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
-      margin-bottom: 4px;
-    }
-    
-    .table-item:hover {
-      background: var(--bg);
-    }
-    
-    .table-item.active {
-      background: var(--primary);
-      color: white;
-    }
-    
-    .table-item-name {
-      font-weight: 500;
-    }
-    
-    .table-item-meta {
-      font-size: 0.8em;
-      color: var(--text-light);
-    }
-    
-    .table-item.active .table-item-meta {
-      color: rgba(255,255,255,0.8);
-    }
-    
-    /* 主内容 */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    /* 头部 */
-    .header {
-      background: white;
-      padding: 20px 30px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    
-    .search-box {
-      flex: 1;
-      position: relative;
-    }
-    
-    .search-input {
-      width: 100%;
-      padding: 12px 20px;
-      font-size: 1em;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    
-    .search-input:focus {
-      border-color: var(--primary);
-    }
-    
-    .search-btn {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 8px 16px;
-      background: var(--primary);
-      color: white;
       border: none;
-      border-radius: 8px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
     
-    .search-btn:hover {
-      background: var(--primary-dark);
+    .btn-primary {
+      background: var(--accent);
+      color: white;
     }
     
-    .search-btn:disabled {
-      opacity: 0.6;
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+    
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    
+    .btn-small {
+      padding: 4px 10px;
+      font-size: 0.8em;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
     }
     
-    /* 内容区 */
-    .content {
-      flex: 1;
-      padding: 30px;
-      overflow-y: auto;
+    /* Main container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
     }
     
-    /* 卡片 */
-    .card {
-      background: white;
+    /* Query box */
+    .query-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .query-input-wrapper {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .query-input {
+      flex: 1;
+      padding: 14px 18px;
+      font-size: 1em;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .query-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    
+    .query-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    /* Tables section */
+    .section {
+      margin-bottom: 24px;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .section-title {
+      font-size: 1.1em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Cards */
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
     }
     
     .card-header {
-      padding: 15px 20px;
-      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
       font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background: var(--bg-tertiary);
     }
     
     .card-body {
       padding: 20px;
     }
     
-    /* 表格 */
+    /* Table list */
+    .table-grid {
+      display: grid;
+      gap: 12px;
+    }
+    
+    .table-item {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s;
+    }
+    
+    .table-item:hover {
+      border-color: var(--accent);
+    }
+    
+    .table-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      flex: 1;
+    }
+    
+    .table-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--bg-hover);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+    }
+    
+    .table-details h4 {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    
+    .table-meta {
+      font-size: 0.85em;
+      color: var(--text-secondary);
+    }
+    
+    .table-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    /* Results */
+    .sql-display {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    
+    .sql-keyword { color: #63b3ed; }
+    .sql-string { color: #68d391; }
+    .sql-number { color: #f6ad55; }
+    
+    /* Data table */
+    .table-container {
+      max-height: 500px;
+      overflow: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    
     .data-table {
       width: 100%;
       border-collapse: collapse;
+      font-size: 0.9em;
     }
     
     .data-table th,
     .data-table td {
-      padding: 10px 12px;
+      padding: 10px 14px;
       text-align: left;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--border-color);
     }
     
     .data-table th {
-      background: var(--bg);
+      background: var(--bg-tertiary);
       font-weight: 600;
       position: sticky;
       top: 0;
+      z-index: 10;
     }
     
     .data-table tr:hover td {
-      background: var(--bg);
+      background: var(--bg-hover);
     }
     
-    .table-container {
-      max-height: 400px;
-      overflow: auto;
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      transition: all 0.2s;
+      cursor: pointer;
+      background: var(--bg-tertiary);
     }
     
-    /* SQL 显示 */
-    .sql-display {
-      background: #1a202c;
-      color: #a0aec0;
-      padding: 15px;
-      border-radius: 8px;
-      font-family: 'Monaco', 'Menlo', monospace;
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+    }
+    
+    .upload-icon {
+      font-size: 3em;
+      margin-bottom: 12px;
+    }
+    
+    .upload-text {
+      color: var(--text-secondary);
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0;
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
       font-size: 0.9em;
-      overflow-x: auto;
-      margin-bottom: 15px;
+      color: var(--text-secondary);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      margin-bottom: -1px;
     }
     
-    .sql-keyword {
-      color: #63b3ed;
+    .tab:hover {
+      color: var(--text-primary);
     }
     
-    .sql-string {
-      color: #68d391;
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
     }
     
-    .sql-number {
-      color: #f6ad55;
+    /* Charts */
+    .chart-container {
+      height: 350px;
+      margin: 16px 0;
     }
     
-    /* 洞察卡片 */
-    .insights-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 15px;
-    }
-    
-    .insight-card {
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid;
-    }
-    
-    .insight-card.high {
-      background: #fff5f5;
-      border-color: var(--danger);
-    }
-    
-    .insight-card.medium {
-      background: #fffaf0;
-      border-color: var(--warning);
-    }
-    
-    .insight-card.low {
-      background: var(--bg);
-      border-color: var(--text-light);
-    }
-    
-    .insight-title {
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-    
-    .insight-desc {
-      font-size: 0.9em;
-      color: var(--text-light);
-    }
-    
-    /* 统计卡片 */
+    /* Stats */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
+      gap: 16px;
       margin-bottom: 20px;
     }
     
     .stat-card {
-      background: white;
+      background: var(--bg-tertiary);
       padding: 20px;
-      border-radius: 12px;
+      border-radius: 10px;
       text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid var(--border-color);
     }
     
     .stat-value {
-      font-size: 2em;
+      font-size: 1.8em;
       font-weight: 700;
-      color: var(--primary);
+      color: var(--accent);
     }
     
     .stat-label {
-      color: var(--text-light);
+      color: var(--text-secondary);
       font-size: 0.85em;
+      margin-top: 4px;
     }
     
-    /* 图表 */
-    .chart-container {
-      height: 300px;
-      margin: 20px 0;
+    /* Insights */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
     }
     
-    /* 标签 */
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.75em;
-      font-weight: 500;
+    .insight-card {
+      padding: 14px 16px;
+      border-radius: 8px;
+      border-left: 4px solid;
+      background: var(--bg-tertiary);
     }
     
-    .tag.primary { background: #e9d8fd; color: #6b46c1; }
-    .tag.success { background: #c6f6d5; color: #276749; }
-    .tag.warning { background: #feebc8; color: #c05621; }
-    .tag.danger { background: #fed7d7; color: #c53030; }
+    .insight-card.high { border-color: var(--danger); }
+    .insight-card.medium { border-color: var(--warning); }
+    .insight-card.low { border-color: var(--text-muted); }
     
-    /* 空状态 */
+    .insight-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .insight-desc {
+      font-size: 0.9em;
+      color: var(--text-secondary);
+    }
+    
+    /* Empty state */
     .empty-state {
       text-align: center;
       padding: 60px 20px;
-      color: var(--text-light);
+      color: var(--text-secondary);
     }
     
     .empty-icon {
       font-size: 4em;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     
-    /* 加载状态 */
+    /* Loading */
     .loading {
       display: flex;
       align-items: center;
@@ -353,10 +441,10 @@
     }
     
     .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--border);
-      border-top-color: var(--primary);
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -365,79 +453,21 @@
       to { transform: rotate(360deg); }
     }
     
-    /* 响应式 */
-    @media (max-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-      
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    
-    /* 上传区域 */
-    .upload-zone {
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 40px;
-      text-align: center;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    
-    .upload-zone:hover,
-    .upload-zone.dragover {
-      border-color: var(--primary);
-      background: var(--bg);
-    }
-    
-    .upload-icon {
-      font-size: 3em;
-      margin-bottom: 15px;
-    }
-    
-    /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 5px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
-    }
-    
-    .tab {
-      padding: 10px 20px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 0.95em;
-      color: var(--text-light);
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-    }
-    
-    .tab:hover {
-      color: var(--text);
-    }
-    
-    .tab.active {
-      color: var(--primary);
-      border-bottom-color: var(--primary);
-    }
-    
     /* Toast */
     .toast {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 15px 20px;
-      background: #1a202c;
-      color: white;
+      bottom: 24px;
+      right: 24px;
+      padding: 14px 20px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       transform: translateY(100px);
       opacity: 0;
       transition: all 0.3s;
+      z-index: 1000;
     }
     
     .toast.show {
@@ -445,152 +475,315 @@
       opacity: 1;
     }
     
-    .toast.success {
-      background: var(--success);
+    .toast.success { border-color: var(--success); }
+    .toast.error { border-color: var(--danger); }
+    
+    /* Tags */
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75em;
+      font-weight: 500;
     }
     
-    .toast.error {
-      background: var(--danger);
+    .tag.primary { background: rgba(99, 102, 241, 0.2); color: var(--accent); }
+    .tag.success { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .tag.warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .tag.danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    
+    /* Help modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal-overlay.show {
+      display: flex;
+    }
+    
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-title {
+      font-size: 1.1em;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: var(--text-secondary);
+      line-height: 1;
+    }
+    
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+    
+    .modal-body {
+      padding: 20px;
+    }
+    
+    .help-section {
+      margin-bottom: 20px;
+    }
+    
+    .help-section h4 {
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+    
+    .help-section ul {
+      margin-left: 20px;
+      color: var(--text-secondary);
+    }
+    
+    .help-section li {
+      margin-bottom: 6px;
+    }
+    
+    .help-section code {
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        padding: 12px 16px;
+      }
+      
+      .container {
+        padding: 16px;
+      }
+      
+      .query-input-wrapper {
+        flex-direction: column;
+      }
+      
+      .table-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      
+      .table-actions {
+        width: 100%;
+      }
+      
+      .table-actions .btn {
+        flex: 1;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <!-- 侧边栏 -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo">📊 DataMind</div>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">📊 DataMind</div>
+    <div class="header-actions">
+      <button class="btn btn-primary" id="uploadBtn">
+        📤 上传数据
+      </button>
+      <button class="btn btn-secondary" id="helpBtn">
+        ❓ 帮助
+      </button>
+    </div>
+  </header>
+  
+  <!-- Main container -->
+  <div class="container">
+    <!-- Query box -->
+    <div class="query-box">
+      <div class="query-input-wrapper">
+        <input type="text" class="query-input" id="questionInput" 
+               placeholder="💬 问问数据... 例如：销售额最高的产品是哪个？">
+        <button class="btn btn-primary" id="askBtn">🔍 查询</button>
       </div>
-      <div class="sidebar-content">
-        <div class="section-title">数据表</div>
-        <ul class="table-list" id="tableList">
-          <!-- 动态加载 -->
-        </ul>
-      </div>
-    </aside>
+    </div>
     
-    <!-- 主内容 -->
-    <main class="main">
-      <!-- 头部 -->
-      <header class="header">
-        <div class="search-box">
-          <input type="text" class="search-input" id="questionInput" 
-                 placeholder="输入问题，例如：销售额最高的产品是哪个？">
-          <button class="search-btn" id="askBtn">查询</button>
+    <!-- Tables section -->
+    <div class="section" id="tablesSection">
+      <div class="section-header">
+        <div class="section-title">📊 已上传数据集</div>
+        <button class="btn btn-secondary btn-small" id="refreshBtn">🔄 刷新</button>
+      </div>
+      <div class="table-grid" id="tableGrid">
+        <!-- Dynamic content -->
+      </div>
+    </div>
+    
+    <!-- Results section -->
+    <div id="resultsSection" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <span>📝 SQL 查询</span>
+          <span id="execTime" style="color: var(--text-secondary); font-size: 0.85em;"></span>
         </div>
-      </header>
+        <div class="card-body">
+          <pre class="sql-display" id="sqlDisplay"></pre>
+        </div>
+      </div>
       
-      <!-- 内容区 -->
-      <div class="content" id="content">
-        <!-- 默认显示上传页面 -->
-        <div id="homeView">
-          <div class="card">
-            <div class="card-header">
-              <span>📁 导入数据</span>
-            </div>
-            <div class="card-body">
-              <div class="upload-zone" id="uploadZone">
-                <div class="upload-icon">📤</div>
-                <p>拖放 CSV 文件到此处，或点击选择文件</p>
-                <input type="file" id="fileInput" accept=".csv" style="display: none;">
-              </div>
-            </div>
-          </div>
-          
-          <div class="card">
-            <div class="card-header">
-              <span>🚀 快速开始</span>
-            </div>
-            <div class="card-body">
-              <p>1. 导入 CSV 文件到 DataMind</p>
-              <p>2. 使用自然语言查询数据，例如：</p>
-              <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-light);">
-                <li>"销售额最高的产品是什么？"</li>
-                <li>"最近 7 天的趋势如何？"</li>
-                <li>"各地区的销售额对比"</li>
-              </ul>
-            </div>
-          </div>
+      <div class="card" style="margin-top: 16px;">
+        <div class="card-header">
+          <span>📈 查询结果</span>
+          <span id="rowCount" style="color: var(--text-secondary); font-size: 0.85em;"></span>
         </div>
-        
-        <!-- 查询结果视图 -->
-        <div id="resultView" style="display: none;">
-          <div class="card">
-            <div class="card-header">
-              <span>📝 SQL 查询</span>
-              <span id="execTime"></span>
-            </div>
-            <div class="card-body">
-              <pre class="sql-display" id="sqlDisplay"></pre>
-            </div>
+        <div class="card-body">
+          <div class="tabs">
+            <button class="tab active" data-tab="table">表格</button>
+            <button class="tab" data-tab="chart">图表</button>
           </div>
           
-          <div class="card">
-            <div class="card-header">
-              <span>📊 查询结果</span>
-              <span id="rowCount"></span>
-            </div>
-            <div class="card-body">
-              <div class="tabs">
-                <button class="tab active" data-tab="table">表格</button>
-                <button class="tab" data-tab="chart">图表</button>
-              </div>
-              
-              <div id="tableView">
-                <div class="table-container">
-                  <table class="data-table" id="resultTable">
-                    <thead id="resultHead"></thead>
-                    <tbody id="resultBody"></tbody>
-                  </table>
-                </div>
-              </div>
-              
-              <div id="chartView" style="display: none;">
-                <div class="chart-container" id="chart"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 表详情视图 -->
-        <div id="tableDetailView" style="display: none;">
-          <div class="stats-grid" id="tableStats"></div>
-          
-          <div class="card">
-            <div class="card-header">
-              <span>📋 列信息</span>
-            </div>
-            <div class="card-body">
+          <div id="tableView">
+            <div class="table-container">
               <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>列名</th>
-                    <th>类型</th>
-                    <th>示例值</th>
-                  </tr>
-                </thead>
-                <tbody id="columnsBody"></tbody>
+                <thead id="resultHead"></thead>
+                <tbody id="resultBody"></tbody>
               </table>
             </div>
           </div>
           
-          <div class="card">
-            <div class="card-header">
-              <span>💡 洞察</span>
-            </div>
-            <div class="card-body">
-              <div id="insightsContainer" class="insights-grid"></div>
-            </div>
+          <div id="chartView" style="display: none;">
+            <div class="chart-container" id="chart"></div>
           </div>
         </div>
       </div>
-    </main>
+    </div>
+    
+    <!-- Table detail section -->
+    <div id="tableDetailSection" style="display: none;">
+      <div class="stats-grid" id="tableStats"></div>
+      
+      <div class="card">
+        <div class="card-header">📋 列信息</div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>列名</th>
+                  <th>类型</th>
+                  <th>示例值</th>
+                </tr>
+              </thead>
+              <tbody id="columnsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top: 16px;">
+        <div class="card-header">💡 数据洞察</div>
+        <div class="card-body">
+          <div id="insightsContainer" class="insights-grid"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Upload section (hidden by default) -->
+    <div id="uploadSection" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <span>📤 上传数据</span>
+          <button class="btn btn-secondary btn-small" id="closeUploadBtn">✕ 关闭</button>
+        </div>
+        <div class="card-body">
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">
+              拖放 CSV 文件到此处，或点击选择文件
+            </div>
+            <input type="file" id="fileInput" accept=".csv" style="display: none;">
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   
+  <!-- Help Modal -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">❓ 帮助中心</div>
+        <button class="modal-close" id="closeHelpBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="help-section">
+          <h4>🚀 快速开始</h4>
+          <ul>
+            <li>点击「上传数据」按钮导入 CSV 文件</li>
+            <li>在搜索框输入问题，点击「查询」</li>
+            <li>查看 SQL 和结果，切换表格/图表视图</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <h4>💬 查询示例</h4>
+          <ul>
+            <li><code>销售额最高的产品是什么？</code></li>
+            <li><code>最近7天的订单数量</code></li>
+            <li><code>各地区销售额排名</code></li>
+            <li><code>平均客单价是多少？</code></li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <h4>📊 数据管理</h4>
+          <ul>
+            <li>点击表名查看详细信息和数据洞察</li>
+            <li>点击「查询」按钮对该表进行查询</li>
+            <li>点击「分析」按钮获取智能分析</li>
+            <li>点击「导出」下载 CSV 文件</li>
+            <li>点击「删除」移除数据表</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <h4>⌨️ 快捷键</h4>
+          <ul>
+            <li><code>Enter</code> - 执行查询</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast -->
   <div class="toast" id="toast"></div>
   
   <script>
-    // API 调用
+    // API calls
     const API = {
       async getTables() {
         const res = await fetch('/api/tables');
@@ -618,82 +811,117 @@
           body: JSON.stringify({ data, name })
         });
         return res.json();
+      },
+      
+      async deleteTable(table) {
+        const res = await fetch(`/api/tables/${encodeURIComponent(table)}`, {
+          method: 'DELETE'
+        });
+        return res.json();
+      },
+      
+      async exportTable(table) {
+        const res = await fetch(`/api/export/${encodeURIComponent(table)}`);
+        if (!res.ok) {
+          const json = await res.json();
+          throw new Error(json.error || '导出失败');
+        }
+        return res.text();
       }
     };
     
-    // 状态
+    // State
     let state = {
       tables: [],
       currentTable: null,
       currentResult: null
     };
     
-    // DOM 元素
+    // DOM elements
+    const $ = id => document.getElementById(id);
     const elements = {
-      tableList: document.getElementById('tableList'),
-      questionInput: document.getElementById('questionInput'),
-      askBtn: document.getElementById('askBtn'),
-      content: document.getElementById('content'),
-      homeView: document.getElementById('homeView'),
-      resultView: document.getElementById('resultView'),
-      tableDetailView: document.getElementById('tableDetailView'),
-      sqlDisplay: document.getElementById('sqlDisplay'),
-      resultTable: document.getElementById('resultTable'),
-      resultHead: document.getElementById('resultHead'),
-      resultBody: document.getElementById('resultBody'),
-      rowCount: document.getElementById('rowCount'),
-      execTime: document.getElementById('execTime'),
-      uploadZone: document.getElementById('uploadZone'),
-      fileInput: document.getElementById('fileInput'),
-      tableStats: document.getElementById('tableStats'),
-      columnsBody: document.getElementById('columnsBody'),
-      insightsContainer: document.getElementById('insightsContainer'),
-      toast: document.getElementById('toast'),
-      chart: document.getElementById('chart')
+      tableGrid: $('tableGrid'),
+      questionInput: $('questionInput'),
+      askBtn: $('askBtn'),
+      uploadBtn: $('uploadBtn'),
+      helpBtn: $('helpBtn'),
+      refreshBtn: $('refreshBtn'),
+      resultsSection: $('resultsSection'),
+      tableDetailSection: $('tableDetailSection'),
+      tablesSection: $('tablesSection'),
+      uploadSection: $('uploadSection'),
+      sqlDisplay: $('sqlDisplay'),
+      resultHead: $('resultHead'),
+      resultBody: $('resultBody'),
+      rowCount: $('rowCount'),
+      execTime: $('execTime'),
+      uploadZone: $('uploadZone'),
+      fileInput: $('fileInput'),
+      closeUploadBtn: $('closeUploadBtn'),
+      tableStats: $('tableStats'),
+      columnsBody: $('columnsBody'),
+      insightsContainer: $('insightsContainer'),
+      toast: $('toast'),
+      chart: $('chart'),
+      helpModal: $('helpModal'),
+      closeHelpBtn: $('closeHelpBtn')
     };
     
-    // 加载表列表
+    // Load tables
     async function loadTables() {
       const result = await API.getTables();
       if (result.success) {
         state.tables = result.data;
         renderTableList();
+      } else {
+        showToast('加载表列表失败', 'error');
       }
     }
     
-    // 渲染表列表
+    // Render table list
     function renderTableList() {
       if (state.tables.length === 0) {
-        elements.tableList.innerHTML = '<li style="padding: 10px; color: var(--text-light);">暂无数据表</li>';
+        elements.tableGrid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div>暂无数据表，点击「上传数据」导入 CSV 文件</div>
+          </div>
+        `;
         return;
       }
       
-      elements.tableList.innerHTML = state.tables.map(t => `
-        <li class="table-item ${state.currentTable === t.name ? 'active' : ''}" data-table="${t.name}">
-          <div class="table-item-name">${t.name}</div>
-          <div class="table-item-meta">${t.rowCount.toLocaleString()} 行 · ${t.columns.length} 列</div>
-        </li>
+      elements.tableGrid.innerHTML = state.tables.map(t => `
+        <div class="table-item" data-table="${t.name}">
+          <div class="table-info" onclick="showTableDetail('${t.name}')">
+            <div class="table-icon">📊</div>
+            <div class="table-details">
+              <h4>${t.name}</h4>
+              <div class="table-meta">${t.rowCount.toLocaleString()} 行 · ${t.columns.length} 列</div>
+            </div>
+          </div>
+          <div class="table-actions">
+            <button class="btn btn-secondary btn-small" onclick="queryTable('${t.name}')">查询</button>
+            <button class="btn btn-secondary btn-small" onclick="analyzeTable('${t.name}')">分析</button>
+            <button class="btn btn-secondary btn-small" onclick="exportTable('${t.name}')">导出</button>
+            <button class="btn btn-danger btn-small" onclick="deleteTable('${t.name}')">删除</button>
+          </div>
+        </div>
       `).join('');
-      
-      // 绑定点击事件
-      elements.tableList.querySelectorAll('.table-item').forEach(item => {
-        item.addEventListener('click', () => showTableDetail(item.dataset.table));
-      });
     }
     
-    // 显示表详情
+    // Show table detail
     async function showTableDetail(tableName) {
       state.currentTable = tableName;
-      renderTableList();
       
-      elements.homeView.style.display = 'none';
-      elements.resultView.style.display = 'none';
-      elements.tableDetailView.style.display = 'block';
+      elements.tablesSection.style.display = 'block';
+      elements.resultsSection.style.display = 'none';
+      elements.uploadSection.style.display = 'none';
+      elements.tableDetailSection.style.display = 'block';
       
       const table = state.tables.find(t => t.name === tableName);
       if (!table) return;
       
-      // 统计卡片
+      // Stats
       elements.tableStats.innerHTML = `
         <div class="stat-card">
           <div class="stat-value">${table.rowCount.toLocaleString()}</div>
@@ -705,7 +933,7 @@
         </div>
       `;
       
-      // 列信息
+      // Columns
       elements.columnsBody.innerHTML = table.columns.map(col => `
         <tr>
           <td><strong>${col.name}</strong></td>
@@ -714,26 +942,25 @@
         </tr>
       `).join('');
       
-      // 分析
+      // Insights
+      elements.insightsContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      
       const analyzeResult = await API.analyze(tableName);
       if (analyzeResult.success) {
         renderInsights(analyzeResult.data.insights);
+      } else {
+        elements.insightsContainer.innerHTML = '<div style="color: var(--text-secondary);">分析失败</div>';
       }
     }
     
-    // 渲染洞察
+    // Render insights
     function renderInsights(insights) {
       if (!insights || insights.length === 0) {
-        elements.insightsContainer.innerHTML = '<p style="color: var(--text-light);">暂无明显洞察</p>';
+        elements.insightsContainer.innerHTML = '<div style="color: var(--text-secondary);">暂无明显洞察</div>';
         return;
       }
       
-      const typeIcons = {
-        trend: '📈',
-        anomaly: '⚠️',
-        correlation: '🔗',
-        distribution: '📊'
-      };
+      const typeIcons = { trend: '📈', anomaly: '⚠️', correlation: '🔗', distribution: '📊' };
       
       elements.insightsContainer.innerHTML = insights.map(insight => `
         <div class="insight-card ${insight.significance}">
@@ -743,13 +970,16 @@
       `).join('');
     }
     
-    // 执行查询
+    // Execute query
     async function executeQuery() {
       const question = elements.questionInput.value.trim();
-      if (!question) return;
+      if (!question) {
+        showToast('请输入问题', 'error');
+        return;
+      }
       
       elements.askBtn.disabled = true;
-      elements.askBtn.textContent = '查询中...';
+      elements.askBtn.innerHTML = '<span class="loading"><span class="spinner"></span></span> 查询中...';
       
       try {
         const result = await API.ask(question, state.currentTable);
@@ -761,39 +991,40 @@
         
         state.currentResult = result.data;
         
-        // 显示结果视图
-        elements.homeView.style.display = 'none';
-        elements.tableDetailView.style.display = 'none';
-        elements.resultView.style.display = 'block';
+        // Show results
+        elements.tablesSection.style.display = 'block';
+        elements.tableDetailSection.style.display = 'none';
+        elements.uploadSection.style.display = 'none';
+        elements.resultsSection.style.display = 'block';
         
         // SQL
         elements.sqlDisplay.textContent = result.data.sql;
         
-        // 执行时间
+        // Time
         elements.execTime.textContent = `执行时间: ${result.data.executionTime}ms`;
         
-        // 行数
+        // Row count
         elements.rowCount.textContent = `${result.data.rowCount} 行`;
         
-        // 表格
+        // Table
         renderResultTable(result.data);
         
-        // 图表
+        // Chart
         renderChart(result.data);
         
       } catch (error) {
         showToast('查询失败: ' + error.message, 'error');
       } finally {
         elements.askBtn.disabled = false;
-        elements.askBtn.textContent = '查询';
+        elements.askBtn.textContent = '🔍 查询';
       }
     }
     
-    // 渲染结果表格
+    // Render result table
     function renderResultTable(data) {
       if (data.rows.length === 0) {
         elements.resultHead.innerHTML = '';
-        elements.resultBody.innerHTML = '<tr><td colspan="100" style="text-align: center; color: var(--text-light);">无数据</td></tr>';
+        elements.resultBody.innerHTML = '<tr><td colspan="100" style="text-align: center; color: var(--text-secondary);">无数据</td></tr>';
         return;
       }
       
@@ -803,14 +1034,14 @@
       `).join('');
     }
     
-    // 格式化值
+    // Format value
     function formatValue(val) {
-      if (val === null || val === undefined) return '<span style="color: var(--text-light);">NULL</span>';
+      if (val === null || val === undefined) return '<span style="color: var(--text-muted);">NULL</span>';
       if (typeof val === 'number') return val.toLocaleString();
       return String(val);
     }
     
-    // 渲染图表
+    // Render chart
     function renderChart(data) {
       if (data.rows.length === 0) return;
       
@@ -820,23 +1051,81 @@
       const chart = echarts.init(elements.chart);
       
       chart.setOption({
+        backgroundColor: 'transparent',
         tooltip: { trigger: 'axis' },
         xAxis: {
           type: 'category',
-          data: data.rows.slice(0, 20).map(r => r[xCol])
+          data: data.rows.slice(0, 20).map(r => String(r[xCol])),
+          axisLine: { lineStyle: { color: '#333' } },
+          axisLabel: { color: '#a0a0a0' }
         },
-        yAxis: { type: 'value' },
+        yAxis: { 
+          type: 'value',
+          splitLine: { lineStyle: { color: '#333' } },
+          axisLabel: { color: '#a0a0a0' }
+        },
         series: [{
           type: 'bar',
           data: data.rows.slice(0, 20).map(r => r[yCol]),
-          itemStyle: { color: '#667eea' }
+          itemStyle: { color: '#6366f1' }
         }]
       });
     }
     
-    // 文件上传
+    // Query table
+    window.queryTable = function(tableName) {
+      state.currentTable = tableName;
+      elements.questionInput.focus();
+      showToast(`已选择表: ${tableName}`, 'success');
+    };
+    
+    // Analyze table
+    window.analyzeTable = async function(tableName) {
+      showTableDetail(tableName);
+    };
+    
+    // Export table
+    window.exportTable = async function(tableName) {
+      try {
+        showToast('正在导出...', 'success');
+        const csv = await API.exportTable(tableName);
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${tableName}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showToast('导出成功', 'success');
+      } catch (error) {
+        showToast('导出失败: ' + error.message, 'error');
+      }
+    };
+    
+    // Delete table
+    window.deleteTable = async function(tableName) {
+      if (!confirm(`确定要删除表 "${tableName}" 吗？此操作不可撤销。`)) {
+        return;
+      }
+      
+      try {
+        const result = await API.deleteTable(tableName);
+        if (result.success) {
+          showToast(`表 "${tableName}" 已删除`, 'success');
+          await loadTables();
+        } else {
+          showToast(result.error, 'error');
+        }
+      } catch (error) {
+        showToast('删除失败: ' + error.message, 'error');
+      }
+    };
+    
+    // File upload
     async function handleFileUpload(file) {
-      if (!file.name.endsWith('.csv')) {
+      if (!file.name.toLowerCase().endsWith('.csv')) {
         showToast('只支持 CSV 文件', 'error');
         return;
       }
@@ -844,15 +1133,17 @@
       const reader = new FileReader();
       reader.onload = async (e) => {
         const data = e.target.result;
-        const name = file.name.replace('.csv', '');
+        const name = file.name.replace(/\.csv$/i, '');
         
-        showToast('正在导入...', 'info');
+        showToast('正在导入...', 'success');
         
         const result = await API.importCSV(data, name);
         
         if (result.success) {
           showToast(`导入成功: ${result.data.rowCount} 行`, 'success');
           await loadTables();
+          elements.uploadSection.style.display = 'none';
+          elements.tablesSection.style.display = 'block';
         } else {
           showToast('导入失败: ' + result.error, 'error');
         }
@@ -862,7 +1153,7 @@
     }
     
     // Toast
-    function showToast(message, type = 'info') {
+    function showToast(message, type = 'success') {
       elements.toast.textContent = message;
       elements.toast.className = `toast ${type} show`;
       
@@ -871,7 +1162,7 @@
       }, 3000);
     }
     
-    // Tab 切换
+    // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -887,12 +1178,41 @@
       });
     });
     
-    // 事件绑定
+    // Event bindings
     elements.askBtn.addEventListener('click', executeQuery);
     elements.questionInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') executeQuery();
     });
     
+    elements.uploadBtn.addEventListener('click', () => {
+      elements.tablesSection.style.display = 'none';
+      elements.resultsSection.style.display = 'none';
+      elements.tableDetailSection.style.display = 'none';
+      elements.uploadSection.style.display = 'block';
+    });
+    
+    elements.closeUploadBtn.addEventListener('click', () => {
+      elements.uploadSection.style.display = 'none';
+      elements.tablesSection.style.display = 'block';
+    });
+    
+    elements.refreshBtn.addEventListener('click', loadTables);
+    
+    elements.helpBtn.addEventListener('click', () => {
+      elements.helpModal.classList.add('show');
+    });
+    
+    elements.closeHelpBtn.addEventListener('click', () => {
+      elements.helpModal.classList.remove('show');
+    });
+    
+    elements.helpModal.addEventListener('click', (e) => {
+      if (e.target === elements.helpModal) {
+        elements.helpModal.classList.remove('show');
+      }
+    });
+    
+    // File upload
     elements.uploadZone.addEventListener('click', () => elements.fileInput.click());
     elements.fileInput.addEventListener('change', (e) => {
       if (e.target.files[0]) handleFileUpload(e.target.files[0]);
@@ -911,7 +1231,7 @@
       if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
     });
     
-    // 初始化
+    // Initialize
     loadTables();
   </script>
 </body>

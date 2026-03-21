@@ -7,7 +7,8 @@
     "datamind": "./dist/cli/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-public",
+    "copy-public": "mkdir -p dist/ui/public && cp src/ui/public/index.html dist/ui/public/",
     "start": "ts-node src/cli/index.ts",
     "dev": "ts-node src/cli/index.ts",
     "test": "jest --runInBand",
