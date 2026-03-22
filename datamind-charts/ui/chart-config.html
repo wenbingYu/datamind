@@ -1,0 +1,491 @@
+<!-- DataMind Web UI - 高级图表组件 -->
+<!-- 将此代码插入到 index.html 的 <script> 部分之前 -->
+
+<style>
+  /* 图表配置面板样式 */
+  .chart-config-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 320px;
+    height: 100vh;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-color);
+    padding: 20px;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+  
+  .chart-config-panel.open {
+    transform: translateX(0);
+  }
+  
+  .chart-config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .chart-config-title {
+    font-weight: 600;
+    font-size: 1.1em;
+  }
+  
+  .chart-config-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.5em;
+    padding: 0;
+    line-height: 1;
+  }
+  
+  .chart-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .chart-type-btn {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 12px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  
+  .chart-type-btn:hover {
+    background: var(--bg-hover);
+  }
+  
+  .chart-type-btn.active {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.1);
+  }
+  
+  .chart-type-icon {
+    font-size: 1.5em;
+    margin-bottom: 4px;
+  }
+  
+  .chart-type-label {
+    font-size: 0.75em;
+    color: var(--text-secondary);
+  }
+  
+  .config-section {
+    margin-bottom: 20px;
+  }
+  
+  .config-section-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .config-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  .config-label {
+    flex: 1;
+    font-size: 0.9em;
+  }
+  
+  .config-select, .config-input {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text-primary);
+    font-size: 0.9em;
+    width: 150px;
+  }
+  
+  .config-select:focus, .config-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  
+  .theme-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .theme-btn.active {
+    border-color: var(--accent);
+  }
+  
+  .theme-btn::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    font-size: 0.6em;
+    text-align: center;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  
+  .export-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .export-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 10px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.2s;
+  }
+  
+  .export-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  
+  .apply-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  .apply-btn:hover {
+    background: var(--accent-hover);
+  }
+  
+  /* 图表工具栏 */
+  .chart-toolbar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  .chart-wrapper:hover .chart-toolbar {
+    opacity: 1;
+  }
+  
+  .chart-tool-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+  }
+  
+  .chart-tool-btn:hover {
+    background: var(--accent);
+    color: white;
+  }
+</style>
+
+<!-- 图表配置面板 HTML -->
+<div class="chart-config-panel" id="chartConfigPanel">
+  <div class="chart-config-header">
+    <div class="chart-config-title">📊 图表配置</div>
+    <button class="chart-config-close" onclick="toggleChartPanel()">&times;</button>
+  </div>
+  
+  <!-- 图表类型选择 -->
+  <div class="config-section">
+    <div class="config-section-title">图表类型</div>
+    <div class="chart-type-grid" id="chartTypeGrid">
+      <!-- 动态生成 -->
+    </div>
+  </div>
+  
+  <!-- 数据映射 -->
+  <div class="config-section">
+    <div class="config-section-title">数据映射</div>
+    <div class="config-row">
+      <span class="config-label">X 轴</span>
+      <select class="config-select" id="configXColumn"></select>
+    </div>
+    <div class="config-row">
+      <span class="config-label">Y 轴</span>
+      <select class="config-select" id="configYColumn"></select>
+    </div>
+    <div class="config-row" id="configValueRow" style="display: none;">
+      <span class="config-label">值</span>
+      <select class="config-select" id="configValueColumn"></select>
+    </div>
+  </div>
+  
+  <!-- 主题选择 -->
+  <div class="config-section">
+    <div class="config-section-title">主题</div>
+    <div class="theme-grid" id="themeGrid">
+      <!-- 动态生成 -->
+    </div>
+  </div>
+  
+  <!-- 导出选项 -->
+  <div class="config-section">
+    <div class="config-section-title">导出</div>
+    <div class="export-buttons">
+      <button class="export-btn" onclick="exportChart('png')">📷 PNG</button>
+      <button class="export-btn" onclick="exportChart('svg')">🎨 SVG</button>
+      <button class="export-btn" onclick="exportChart('html')">🌐 HTML</button>
+      <button class="export-btn" onclick="exportChart('json')">📄 JSON</button>
+    </div>
+  </div>
+  
+  <button class="apply-btn" onclick="applyChartConfig()">✨ 应用配置</button>
+</div>
+
+<script>
+// 图表类型定义
+const CHART_TYPES = [
+  { type: 'bar', icon: '📊', label: '柱状图' },
+  { type: 'line', icon: '📈', label: '折线图' },
+  { type: 'pie', icon: '🥧', label: '饼图' },
+  { type: 'scatter', icon: '⚬', label: '散点图' },
+  { type: 'heatmap', icon: '🌡️', label: '热力图' },
+  { type: 'radar', icon: '🕸️', label: '雷达图' },
+  { type: 'funnel', icon: '🔺', label: '漏斗图' },
+  { type: 'treemap', icon: '🌳', label: '树图' },
+  { type: 'sankey', icon: '🌊', label: '桑基图' },
+  { type: 'gauge', icon: '⏱️', label: '仪表盘' },
+  { type: 'boxplot', icon: '📦', label: '箱线图' },
+  { type: 'candlestick', icon: '📈', label: 'K线图' }
+];
+
+// 主题定义
+const CHART_THEMES = [
+  { name: 'default', label: '默认', colors: ['#5470c6', '#91cc75', '#fac858'] },
+  { name: 'dark', label: '深色', colors: ['#4992ff', '#7cffb2', '#fddd60'] },
+  { name: 'vintage', label: '复古', colors: ['#d87c7c', '#919e8b', '#d7ab82'] },
+  { name: 'macarons', label: '马卡龙', colors: ['#2ec7c9', '#b6a2de', '#5ab1ef'] },
+  { name: 'tech', label: '科技', colors: ['#00f0ff', '#7b2cff', '#00ff88'] },
+  { name: 'forest', label: '森林', colors: ['#3ba272', '#91cc75', '#5470c6'] },
+  { name: 'shine', label: '闪耀', colors: ['#c12e34', '#e6b600', '#0098d9'] },
+  { name: 'roma', label: '罗马', colors: ['#e01f54', '#001852', '#f5e8c8'] }
+];
+
+// 当前图表配置状态
+let currentChartConfig = {
+  type: 'bar',
+  theme: 'default',
+  xColumn: null,
+  yColumn: null,
+  valueColumn: null
+};
+
+// 当前图表实例
+let currentChartInstance = null;
+let currentChartData = null;
+
+// 初始化图表配置面板
+function initChartConfigPanel() {
+  // 渲染图表类型按钮
+  const typeGrid = document.getElementById('chartTypeGrid');
+  typeGrid.innerHTML = CHART_TYPES.map(ct => `
+    <button class="chart-type-btn ${ct.type === currentChartConfig.type ? 'active' : ''}" 
+            data-type="${ct.type}" onclick="selectChartType('${ct.type}')">
+      <div class="chart-type-icon">${ct.icon}</div>
+      <div class="chart-type-label">${ct.label}</div>
+    </button>
+  `).join('');
+  
+  // 渲染主题按钮
+  const themeGrid = document.getElementById('themeGrid');
+  themeGrid.innerHTML = CHART_THEMES.map(t => `
+    <button class="theme-btn ${t.name === currentChartConfig.theme ? 'active' : ''}"
+            data-label="${t.label}"
+            style="background: linear-gradient(135deg, ${t.colors.join(', ')})"
+            onclick="selectTheme('${t.name}')"></button>
+  `).join('');
+}
+
+// 选择图表类型
+function selectChartType(type) {
+  currentChartConfig.type = type;
+  
+  // 更新按钮状态
+  document.querySelectorAll('.chart-type-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === type);
+  });
+  
+  // 显示/隐藏值列配置
+  const needsValueColumn = ['heatmap', 'sankey', 'treemap', 'funnel'].includes(type);
+  document.getElementById('configValueRow').style.display = needsValueColumn ? 'flex' : 'none';
+}
+
+// 选择主题
+function selectTheme(theme) {
+  currentChartConfig.theme = theme;
+  
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.name === theme);
+  });
+}
+
+// 打开图表配置面板
+function openChartPanel(data, columns) {
+  currentChartData = data;
+  
+  // 填充列选择器
+  const xSelect = document.getElementById('configXColumn');
+  const ySelect = document.getElementById('configYColumn');
+  const vSelect = document.getElementById('configValueColumn');
+  
+  const options = columns.map(c => `<option value="${c}">${c}</option>`).join('');
+  xSelect.innerHTML = options;
+  ySelect.innerHTML = options;
+  vSelect.innerHTML = options;
+  
+  // 设置默认值
+  if (columns.length > 0) {
+    xSelect.value = columns[0];
+    currentChartConfig.xColumn = columns[0];
+  }
+  if (columns.length > 1) {
+    ySelect.value = columns[1];
+    currentChartConfig.yColumn = columns[1];
+  }
+  if (columns.length > 2) {
+    vSelect.value = columns[2];
+    currentChartConfig.valueColumn = columns[2];
+  }
+  
+  // 显示面板
+  document.getElementById('chartConfigPanel').classList.add('open');
+}
+
+// 关闭图表配置面板
+function toggleChartPanel() {
+  document.getElementById('chartConfigPanel').classList.toggle('open');
+}
+
+// 应用图表配置
+async function applyChartConfig() {
+  if (!currentChartData) return;
+  
+  const config = {
+    type: currentChartConfig.type,
+    theme: currentChartConfig.theme,
+    xColumn: document.getElementById('configXColumn').value,
+    yColumn: document.getElementById('configYColumn').value,
+    valueColumn: document.getElementById('configValueColumn').value
+  };
+  
+  // 调用 API 生成图表
+  try {
+    const response = await fetch('/api/chart/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        data: currentChartData,
+        config
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // 更新图表显示
+      updateChartDisplay(result.data);
+      showToast('图表已更新', 'success');
+    } else {
+      showToast(result.error || '生成失败', 'error');
+    }
+  } catch (e) {
+    showToast('生成失败: ' + e.message, 'error');
+  }
+}
+
+// 导出图表
+async function exportChart(format) {
+  if (!currentChartInstance) {
+    showToast('请先生成图表', 'error');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/chart/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chartConfig: currentChartInstance.getOption(),
+        format,
+        filename: `chart_${Date.now()}`
+      })
+    });
+    
+    if (format === 'png' || format === 'svg' || format === 'pdf') {
+      // 下载文件
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `chart.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      const result = await response.json();
+      showToast(`已导出: ${result.path}`, 'success');
+    }
+  } catch (e) {
+    showToast('导出失败: ' + e.message, 'error');
+  }
+}
+
+// 更新图表显示
+function updateChartDisplay(chartConfig) {
+  if (currentChartInstance) {
+    currentChartInstance.setOption(chartConfig, true);
+  }
+}
+
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', initChartConfigPanel);
+</script>

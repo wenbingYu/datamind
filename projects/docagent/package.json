@@ -1,0 +1,38 @@
+{
+  "name": "docagent",
+  "version": "1.0.0",
+  "description": "CLI tool to transform online documentation into a queryable knowledge base",
+  "main": "dist/index.js",
+  "bin": {
+    "docagent": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "dev": "ts-node src/cli.ts"
+  },
+  "keywords": ["cli", "rag", "documentation", "knowledge-base", "llm"],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "commander": "^12.0.0",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0",
+    "sql.js": "^1.10.0",
+    "openai": "^4.28.0",
+    "turndown": "^7.1.3",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "@types/turndown": "^5.0.4",
+    "@types/uuid": "^9.0.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

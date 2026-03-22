@@ -6,14 +6,10 @@ services:
     container_name: datamind
     ports:
       - "3000:3000"
+    # 绑定挂载：本地 ~/.datamind 目录
     volumes:
-      - datamind-data:/data
-      - ./examples:/app/examples:ro
+      - ${HOME}/.datamind:/root/.datamind
     environment:
       - DATAMIND_API_KEY=${DATAMIND_API_KEY}
       - ZHIPU_API_KEY=${ZHIPU_API_KEY}
     restart: unless-stopped
-
-volumes:
-  datamind-data:
-    driver: local

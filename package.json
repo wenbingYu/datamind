@@ -61,6 +61,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@lancedb/lancedb": "^0.27.1",
     "@types/inquirer": "^9.0.9",
     "chalk": "^5.6.2",
     "cli-table3": "^0.6.5",

@@ -126,7 +126,21 @@ Web UI 同时提供 RESTful API：
 
 ## Docker
 
-### 使用 Docker Compose
+### 数据存储
+
+DataMind 使用固定目录存储数据：
+
+```
+~/.datamind/
+├── duckdb/           # DuckDB 数据库文件
+│   └── datamind.db
+├── lancedb/          # LanceDB 向量索引
+└── apikeys.json      # API Key 配置
+```
+
+本地和 Docker 环境共享同一数据目录（绑定挂载），数据完全兼容。
+
+### Docker Compose
 
 ```bash
 # 设置环境变量
@@ -139,17 +153,19 @@ docker-compose up -d
 open http://localhost:3000
 ```
 
-### 使用 Docker
+数据会自动保存到 `~/.datamind/` 目录，Docker 和本地安装可共享数据。
+
+### Docker
 
 ```bash
 # 构建镜像
 docker build -t datamind .
 
-# 运行容器
+# 运行容器 (绑定挂载本地数据目录)
 docker run -d \
   -p 3000:3000 \
   -e DATAMIND_API_KEY=your_api_key \
-  -v datamind-data:/data \
+  -v ~/.datamind:/root/.datamind \
   datamind
 ```
 

@@ -1,0 +1,43 @@
+{
+  "name": "@datamind/charts",
+  "version": "1.0.0",
+  "description": "DataMind 高级图表模块 - 支持12种图表类型、智能推荐、多格式导出",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "charts",
+    "visualization",
+    "echarts",
+    "heatmap",
+    "radar",
+    "funnel",
+    "sankey",
+    "treemap",
+    "datamind"
+  ],
+  "author": "DataMind",
+  "license": "MIT",
+  "peerDependencies": {
+    "echarts": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wenbingYu/datamind.git",
+    "directory": "src/charts"
+  }
+}
