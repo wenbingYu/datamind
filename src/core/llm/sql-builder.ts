@@ -6,11 +6,12 @@ const SQL_SYSTEM_PROMPT = `你是一个 SQL 专家，负责将自然语言问题
 ## 重要规则
 1. 只返回纯 SQL 语句，不要包含任何解释或 markdown 代码块标记
 2. 生成的 SQL 必须兼容 DuckDB
-3. 仔细检查列名，必须使用数据库中实际存在的列名
-4. 不要使用不存在的列
-5. 对于日期比较，使用标准 SQL 语法
-6. 对于中文字符串，正确处理编码
-7. 根据用户问题和表结构，生成最合适的 SQL 查询`;
+3. 表名和列名必须使用双引号包围，例如: SELECT "列名" FROM "表名"
+4. 仔细检查列名，必须使用数据库中实际存在的列名
+5. 不要使用不存在的列
+6. 对于日期比较，使用标准 SQL 语法
+7. 对于中文字符串，正确处理编码
+8. 根据用户问题和表结构，生成最合适的 SQL 查询`;
 
 export class SQLBuilder {
   private client: LLMClient;
@@ -49,10 +50,10 @@ export class SQLBuilder {
       const maxColumns = 20;
       const columns = t.columns.slice(0, maxColumns).map(c => {
         const samples = c.sampleValues.length > 0 ? ` 示例: ${c.sampleValues.slice(0, 2).join(', ')}` : '';
-        return `  - ${c.name} (${c.type})${samples}`;
+        return `  - "${c.name}" (${c.type})${samples}`;
       }).join('\n');
       const moreCols = t.columns.length > maxColumns ? `\n  ... 共 ${t.columns.length} 列` : '';
-      return `表名: ${t.name}\n行数: ${t.rowCount}\n列:\n${columns}${moreCols}`;
+      return `表名: "${t.name}"\n行数: ${t.rowCount}\n列:\n${columns}${moreCols}`;
     }).join('\n\n');
 
     const prompt = `## 数据库 Schema
@@ -62,7 +63,7 @@ ${tableInfo}
 ## 用户问题
 ${question}
 
-请生成 SQL 查询语句。只返回 SQL，不要任何解释或代码块标记。`;
+请生成 SQL 查询语句。注意：表名和列名必须使用双引号，例如 SELECT "列名" FROM "表名"。只返回 SQL，不要任何解释或代码块标记。`;
 
     const response = await this.client.chat(prompt, SQL_SYSTEM_PROMPT);
     
