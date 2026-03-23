@@ -45,8 +45,9 @@ export async function executeSQLWithTime(sql: string): Promise<{ rows: any[]; ti
 
 export async function tableExists(tableName: string): Promise<boolean> {
   const database = await getDatabase();
+  // DuckDB 存储表名时使用小写，所以需要小写比较
   const result = await database.all(
-    `SELECT table_name FROM information_schema.tables WHERE table_name = ?`,
+    `SELECT table_name FROM information_schema.tables WHERE table_schema = 'main' AND LOWER(table_name) = ?`,
     [tableName.toLowerCase()]
   );
   return result.length > 0;
@@ -63,27 +64,33 @@ export async function getTableNames(): Promise<string[]> {
 export async function getTableMeta(tableName: string): Promise<TableMeta | null> {
   const database = await getDatabase();
   
-  // Check if table exists
-  const exists = await tableExists(tableName);
-  if (!exists) return null;
+  // Get actual table name (case-insensitive search)
+  const tableResult = await database.all(
+    `SELECT table_name FROM information_schema.tables WHERE table_schema = 'main' AND LOWER(table_name) = ?`,
+    [tableName.toLowerCase()]
+  );
+  
+  if (tableResult.length === 0) return null;
+  
+  const actualTableName = tableResult[0].table_name;
   
   // Get row count
-  const countResult = await database.all(`SELECT COUNT(*) as count FROM "${tableName}"`);
+  const countResult = await database.all(`SELECT COUNT(*) as count FROM "${actualTableName}"`);
   const rowCount = typeof countResult[0]?.count === 'bigint' 
     ? Number(countResult[0].count) 
     : (countResult[0]?.count || 0);
   
-  // Get column info
+  // Get column info - use actual table name (case-sensitive)
   const columnsResult = await database.all(
     `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ?`,
-    [tableName.toLowerCase()]
+    [actualTableName]
   );
   
   // Get sample values for each column
   const columns: ColumnMeta[] = [];
   for (const col of columnsResult) {
     const sampleResult = await database.all(
-      `SELECT "${col.column_name}" FROM "${tableName}" WHERE "${col.column_name}" IS NOT NULL LIMIT 5`
+      `SELECT "${col.column_name}" FROM "${actualTableName}" WHERE "${col.column_name}" IS NOT NULL LIMIT 5`
     );
     const sampleValues = sampleResult.map(r => r[col.column_name]);
     
@@ -107,7 +114,7 @@ export async function getTableMeta(tableName: string): Promise<TableMeta | null>
   }
   
   return {
-    name: tableName,
+    name: actualTableName,
     rowCount,
     columns,
     createdAt: Date.now(),

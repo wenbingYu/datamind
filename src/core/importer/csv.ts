@@ -6,10 +6,11 @@ import { executeSQL, tableExists, getTableMeta, getDatabase } from '../engine/du
 import { indexTableSchema } from '../engine/lancedb';
 
 /**
- * 验证表名，只允许字母、数字、下划线
+ * 验证表名，允许中文、字母、数字、下划线
  */
 function validateTableName(name: string): string {
-  const sanitized = name.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  // 保留中文、字母、数字、下划线，其他字符替换为下划线
+  const sanitized = name.replace(/[^\u4e00-\u9fa5a-zA-Z0-9_]/g, '_');
   if (sanitized.length === 0) {
     throw new Error('无效的表名');
   }
@@ -17,14 +18,32 @@ function validateTableName(name: string): string {
 }
 
 /**
- * 验证列名，只允许字母、数字、下划线
+ * 验证列名，允许中文、字母、数字、下划线
  */
 function validateColumnName(name: string): string {
-  const sanitized = name.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  // 保留中文、字母、数字、下划线，其他字符替换为下划线
+  const sanitized = name.replace(/[^\u4e00-\u9fa5a-zA-Z0-9_]/g, '_');
   if (sanitized.length === 0) {
     throw new Error('无效的列名');
   }
   return sanitized;
+}
+
+/**
+ * 生成唯一的列名（处理重复列名）
+ */
+function makeUniqueColumnNames(names: string[]): string[] {
+  const used = new Set<string>();
+  return names.map(name => {
+    let uniqueName = name;
+    let counter = 1;
+    while (used.has(uniqueName)) {
+      uniqueName = `${name}_${counter}`;
+      counter++;
+    }
+    used.add(uniqueName);
+    return uniqueName;
+  });
 }
 
 interface ParseResult {
@@ -152,8 +171,8 @@ export async function importCSV(filePath: string, tableName?: string): Promise<T
   // Parse CSV
   const { headers, rows, columnTypes } = await parseCSV(filePath);
   
-  // 验证并清理列名
-  const validatedHeaders = headers.map(h => validateColumnName(h));
+  // 验证并清理列名，确保唯一
+  const validatedHeaders = makeUniqueColumnNames(headers.map(h => validateColumnName(h)));
   
   // Check if table exists
   const exists = await tableExists(name);

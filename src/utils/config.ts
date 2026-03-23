@@ -7,16 +7,39 @@ import { ConfigError } from './errors';
 
 // 支持自定义数据目录，默认 ~/.datamind
 const DEFAULT_DATA_DIR = process.env.DATAMIND_HOME || path.join(os.homedir(), '.datamind');
+const CONFIG_FILE = path.join(DEFAULT_DATA_DIR, 'config.json');
+
+/**
+ * 从配置文件加载配置
+ */
+function loadConfigFile(): Partial<Config> | null {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const content = fs.readFileSync(CONFIG_FILE, 'utf-8');
+      return JSON.parse(content);
+    }
+  } catch (e) {
+    // 配置文件读取失败，忽略
+  }
+  return null;
+}
 
 export function getConfig(): Config {
-  const apiKey = process.env.DATAMIND_API_KEY || process.env.ZHIPU_API_KEY || '';
+  // 优先级：环境变量 > 配置文件 > 默认值
+  const envApiKey = process.env.DATAMIND_API_KEY || process.env.ZHIPU_API_KEY || '';
+  const fileConfig = loadConfigFile();
+  
+  const apiKey = envApiKey || fileConfig?.llm?.apiKey || '';
+  const provider = fileConfig?.llm?.provider || 'bailian';
+  const model = fileConfig?.llm?.model || 'glm-5';
+  const baseUrl = fileConfig?.llm?.baseUrl || 'https://coding.dashscope.aliyuncs.com/v1';
   
   return {
     llm: {
-      provider: 'bailian',
-      model: 'glm-5',
+      provider: provider,
+      model: model,
       apiKey: apiKey,
-      baseUrl: 'https://coding.dashscope.aliyuncs.com/v1'
+      baseUrl: baseUrl
     },
     storage: {
       dataDir: DEFAULT_DATA_DIR,

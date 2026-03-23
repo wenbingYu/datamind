@@ -61,43 +61,26 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 /**
- * 使用 LLM 生成嵌入向量
+ * 生成简单的文本向量（不使用 LLM，直接使用词频统计）
  */
 async function generateEmbedding(text: string): Promise<number[]> {
-  const config = getConfig();
+  // 简化的 TF-IDF 风格向量，不调用 LLM
+  // 对中文字符进行分词（简单按字符分割）
+  const chars = text.toLowerCase().split('');
+  const words = text.toLowerCase().split(/\s+/);
   
-  if (config.llm.apiKey) {
-    try {
-      const client = getLLMClient(config);
-      // 使用 LLM 生成简化的语义向量
-      // 实际应用中应该调用 embedding API
-      const prompt = `将以下文本转换为 128 维向量表示。只返回 JSON 数组，不要解释。
-
-文本: ${text}
-
-返回格式: [0.1, 0.2, ...]`;
-
-      const response = await client.chat(prompt);
-      try {
-        return JSON.parse(response);
-      } catch {
-        // 解析失败，使用简化方法
-      }
-    } catch {
-      // LLM 调用失败，使用简化方法
+  // 合并字符和单词
+  const allTokens = [...chars, ...words];
+  
+  const wordCount: Record<string, number> = {};
+  for (const word of allTokens) {
+    if (word.length > 0) {
+      wordCount[word] = (wordCount[word] || 0) + 1;
     }
   }
   
-  // 简化的 TF-IDF 风格向量
-  const words = text.toLowerCase().split(/\s+/);
-  const wordCount: Record<string, number> = {};
-  
-  for (const word of words) {
-    wordCount[word] = (wordCount[word] || 0) + 1;
-  }
-  
   const allWords = Object.keys(wordCount).sort();
-  const vector = allWords.map(w => wordCount[w] / words.length);
+  const vector = allWords.map(w => wordCount[w] / allTokens.length);
   
   // 填充到 128 维
   while (vector.length < 128) {
@@ -180,37 +163,7 @@ export async function recommendTables(question: string, limit: number = 3): Prom
   // 按相似度排序
   allSchemas.sort((a, b) => b.similarity - a.similarity);
   
-  // 使用 LLM 进行更精确的匹配（如果有 API）
-  const config = getConfig();
-  if (config.llm.apiKey && allSchemas.length > 0) {
-    try {
-      const client = getLLMClient(config);
-      
-      const topCandidates = allSchemas.slice(0, 5);
-      const schemaInfos = topCandidates.map(t => t.tableName).join(', ');
-      
-      const prompt = `用户问题: "${question}"
-
-可用的数据表: ${schemaInfos}
-
-请判断哪些表与问题最相关。返回最相关的表名，用逗号分隔。如果没有相关表，返回 "无"。
-只返回表名，不要解释。`;
-
-      const response = await client.chat(prompt);
-      
-      if (response && response !== '无') {
-        const recommendedTables = response.split(/[,，]/).map(t => t.trim()).filter(t => t);
-        // 验证表名存在
-        return recommendedTables.filter(t => 
-          allSchemas.some(s => s.tableName === t)
-        ).slice(0, limit);
-      }
-    } catch {
-      // LLM 调用失败，使用向量相似度结果
-    }
-  }
-  
-  // 返回相似度最高的表
+  // 返回相似度最高的表（不再调用 LLM，直接使用向量相似度）
   return allSchemas.slice(0, limit).map(t => t.tableName);
 }
 

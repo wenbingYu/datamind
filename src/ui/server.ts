@@ -37,6 +37,24 @@ import {
   adminAuth
 } from './auth';
 
+/**
+ * 将对象中的 BigInt 转换为 Number
+ * 用于 JSON 序列化
+ */
+function sanitizeBigInt(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'bigint') return Number(obj);
+  if (Array.isArray(obj)) return obj.map(sanitizeBigInt);
+  if (typeof obj === 'object') {
+    const result: any = {};
+    for (const key of Object.keys(obj)) {
+      result[key] = sanitizeBigInt(obj[key]);
+    }
+    return result;
+  }
+  return obj;
+}
+
 // 配置 multer 用于文件上传
 const upload = multer({
   dest: os.tmpdir(),
@@ -143,7 +161,7 @@ export function createApp(options: ServerOptions = {}): express.Application {
       const tables = await getAllTablesMeta();
       res.json({
         success: true,
-        data: tables.map(t => ({
+        data: sanitizeBigInt(tables.map(t => ({
           name: t.name,
           rowCount: t.rowCount,
           columns: t.columns.map(c => ({
@@ -153,7 +171,7 @@ export function createApp(options: ServerOptions = {}): express.Application {
           })),
           createdAt: t.createdAt,
           updatedAt: t.updatedAt
-        }))
+        })))
       });
     } catch (error) {
       res.status(500).json({
@@ -178,11 +196,11 @@ export function createApp(options: ServerOptions = {}): express.Application {
         
         res.json({
           success: true,
-          data: {
+          data: sanitizeBigInt({
             name: meta.name,
             rowCount: meta.rowCount,
             columns: meta.columns.length
-          }
+          })
         });
       } else if (file) {
         const meta = await importCSV(file);
@@ -190,11 +208,11 @@ export function createApp(options: ServerOptions = {}): express.Application {
         
         res.json({
           success: true,
-          data: {
+          data: sanitizeBigInt({
             name: meta.name,
             rowCount: meta.rowCount,
             columns: meta.columns.length
-          }
+          })
         });
       } else {
         res.status(400).json({
@@ -237,12 +255,12 @@ export function createApp(options: ServerOptions = {}): express.Application {
       
       res.json({
         success: true,
-        data: {
+        data: sanitizeBigInt({
           name: meta.name,
           id: meta.name,
           rowCount: meta.rowCount,
           columns: meta.columns.length
-        }
+        })
       });
     } catch (error) {
       res.status(500).json({
@@ -314,7 +332,7 @@ export function createApp(options: ServerOptions = {}): express.Application {
         data: {
           sql,
           columns,
-          rows: rows.slice(0, 1000),
+          rows: sanitizeBigInt(rows.slice(0, 1000)),
           rowCount: rows.length,
           executionTime: time
         }
@@ -403,7 +421,7 @@ export function createApp(options: ServerOptions = {}): express.Application {
           message,
           sql,
           columns,
-          rows: rows.slice(0, 1000),
+          rows: sanitizeBigInt(rows.slice(0, 1000)),
           rowCount: rows.length,
           executionTime: time
         }
@@ -436,7 +454,7 @@ export function createApp(options: ServerOptions = {}): express.Application {
         data: {
           sql,
           columns,
-          rows: rows.slice(0, 1000),
+          rows: sanitizeBigInt(rows.slice(0, 1000)),
           rowCount: rows.length,
           executionTime: time
         }
@@ -457,7 +475,7 @@ export function createApp(options: ServerOptions = {}): express.Application {
       
       res.json({
         success: true,
-        data: result
+        data: sanitizeBigInt(result)
       });
     } catch (error) {
       res.status(500).json({
@@ -482,7 +500,7 @@ export function createApp(options: ServerOptions = {}): express.Application {
       
       res.json({
         success: true,
-        data: meta
+        data: sanitizeBigInt(meta)
       });
     } catch (error) {
       res.status(500).json({
@@ -732,7 +750,7 @@ export function createApp(options: ServerOptions = {}): express.Application {
         data: {
           chartType,
           columns,
-          data: data.slice(0, 100),
+          data: sanitizeBigInt(data.slice(0, 100)),
           rowCount: data.length,
           config
         }

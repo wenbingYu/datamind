@@ -9,7 +9,8 @@ const SQL_SYSTEM_PROMPT = `你是一个 SQL 专家，负责将自然语言问题
 3. 仔细检查列名，必须使用数据库中实际存在的列名
 4. 不要使用不存在的列
 5. 对于日期比较，使用标准 SQL 语法
-6. 对于中文字符串，正确处理编码`;
+6. 对于中文字符串，正确处理编码
+7. 根据用户问题和表结构，生成最合适的 SQL 查询`;
 
 export class SQLBuilder {
   private client: LLMClient;
@@ -19,11 +20,39 @@ export class SQLBuilder {
   }
 
   async generateSQL(question: string, tables: TableMeta[]): Promise<string> {
-    const tableInfo = tables.map(t => {
-      const columns = t.columns.map(c => {
-        return `  - ${c.name} (${c.type})${c.sampleValues.length > 0 ? ` 示例: ${c.sampleValues.slice(0, 3).join(', ')}` : ''}`;
+    // 分离正常表和 UUID 格式表
+    const normalTables = tables.filter(t => {
+      if (t.rowCount === 0) return false;
+      // 检查表名是否像 UUID（纯十六进制）
+      return !/^[a-f0-9]{32,}$/i.test(t.name);
+    });
+
+    const uuidTables = tables.filter(t => {
+      if (t.rowCount === 0) return false;
+      // UUID 格式的表名
+      return /^[a-f0-9]{32,}$/i.test(t.name);
+    });
+
+    // 优先使用正常表，如果没有再使用 UUID 表
+    let tablesToUse = normalTables.length > 0 ? normalTables : uuidTables;
+
+    // 限制表的数量，避免 prompt 过长
+    const maxTables = 3;
+    tablesToUse = tablesToUse.slice(0, maxTables);
+
+    if (tablesToUse.length === 0) {
+      return "SELECT '没有可用的数据表' AS message";
+    }
+
+    const tableInfo = tablesToUse.map(t => {
+      // 限制列的数量，避免 prompt 过长
+      const maxColumns = 20;
+      const columns = t.columns.slice(0, maxColumns).map(c => {
+        const samples = c.sampleValues.length > 0 ? ` 示例: ${c.sampleValues.slice(0, 2).join(', ')}` : '';
+        return `  - ${c.name} (${c.type})${samples}`;
       }).join('\n');
-      return `表名: ${t.name}\n行数: ${t.rowCount}\n列:\n${columns}`;
+      const moreCols = t.columns.length > maxColumns ? `\n  ... 共 ${t.columns.length} 列` : '';
+      return `表名: ${t.name}\n行数: ${t.rowCount}\n列:\n${columns}${moreCols}`;
     }).join('\n\n');
 
     const prompt = `## 数据库 Schema
