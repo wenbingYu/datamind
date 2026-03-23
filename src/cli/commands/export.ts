@@ -87,7 +87,7 @@ async function exportMarkdown(outputFile: string, analyses: AnalysisResult[], op
   for (const analysis of analyses) {
     lines.push(`---`);
     lines.push(``);
-    lines.push(`## 📊 ${analysis.tableName}`);
+    lines.push(`## ${analysis.tableName}`);
     lines.push(``);
     
     // 概览
@@ -123,14 +123,14 @@ async function exportMarkdown(outputFile: string, analyses: AnalysisResult[], op
     
     // 洞察
     if (analysis.insights.length > 0) {
-      lines.push(`### 💡 洞察发现`);
+      lines.push(`### 洞察发现`);
       lines.push(``);
       
       const typeIcons: Record<string, string> = {
         trend: '📈',
         anomaly: '⚠️',
         correlation: '🔗',
-        distribution: '📊'
+        distribution: '[图表]'
       };
       
       const significanceLabels: Record<string, string> = {
@@ -331,7 +331,7 @@ async function exportHTML(outputFile: string, analyses: AnalysisResult[], option
   <div class="container">
     ${analyses.map(analysis => `
     <div class="card">
-      <div class="card-header">📊 ${analysis.tableName}</div>
+      <div class="card-header">${analysis.tableName}</div>
       <div class="card-body">
         <div class="stats-grid">
           <div class="stat-item">
@@ -387,7 +387,7 @@ async function exportHTML(outputFile: string, analyses: AnalysisResult[], option
         </table>
         
         ${analysis.insights.length > 0 ? `
-        <h3 style="margin: 25px 0 15px; font-size: 1em; color: #333;">💡 洞察发现</h3>
+        <h3 style="margin: 25px 0 15px; font-size: 1em; color: #333;">洞察发现</h3>
         ${analysis.insights.map(insight => `
         <div class="insight ${insight.significance}">
           <div class="insight-title">

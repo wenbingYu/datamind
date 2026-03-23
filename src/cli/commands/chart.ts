@@ -43,7 +43,7 @@ const chartCommand = new Command('chart')
         const recommender = new ChartRecommender();
         const recommendations = recommender.recommend(queryResult);
         
-        console.log(chalk.bold.cyan('\n📊 图表推荐:\n'));
+        console.log(chalk.bold.cyan('\n图表推荐:\n'));
         recommendations.forEach((rec, i) => {
           const confidence = (rec.confidence * 100).toFixed(0);
           const confColor = rec.confidence >= 0.8 ? chalk.green : rec.confidence >= 0.6 ? chalk.yellow : chalk.gray;
@@ -88,7 +88,7 @@ const chartCommand = new Command('chart')
       });
       
       console.log(chalk.green.bold('\n✅ 图表已生成!\n'));
-      console.log(`  📊 类型: ${chalk.cyan(options.type)}`);
+      console.log(`  类型: ${chalk.cyan(options.type)}`);
       console.log(`  🎨 主题: ${options.theme}`);
       console.log(`  📁 文件: ${chalk.yellow(outputPath)}`);
       console.log();

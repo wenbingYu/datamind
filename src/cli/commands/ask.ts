@@ -57,7 +57,8 @@ export async function askCommand(
     }
   }
 
-  const spinner = ora('正在生成 SQL...').start();
+  // 使用简单的 spinner，不显示图标
+  const spinner = ora({ text: '正在生成 SQL...', spinner: 'dots' }).start();
 
   try {
     // Initialize LLM client
@@ -71,7 +72,8 @@ export async function askCommand(
     // Execute SQL
     const { rows, time } = await executeSQLWithTime(sql);
     
-    spinner.succeed(chalk.green('查询完成'));
+    spinner.stop();
+    console.log(chalk.green('查询完成'));
 
     // Format output
     if (rows.length === 0) {
@@ -123,29 +125,30 @@ export async function askCommand(
           if (ext === 'json') {
             await saveChartConfig(chartConfig, outputPath);
             console.log();
-            console.log(chalk.green(`✓ 图表配置已保存到: ${outputPath}`));
+            console.log(chalk.green(`[OK] 图表配置已保存到: ${outputPath}`));
           } else if (ext === 'html') {
             await saveChartHTML(chartConfig, outputPath);
             console.log();
-            console.log(chalk.green(`✓ 图表 HTML 已保存到: ${outputPath}`));
+            console.log(chalk.green(`[OK] 图表 HTML 已保存到: ${outputPath}`));
             console.log(chalk.dim(`  在浏览器中打开查看`));
           } else {
             // 默认保存为 HTML
             await saveChartHTML(chartConfig, outputPath.endsWith('.html') ? outputPath : outputPath + '.html');
             console.log();
-            console.log(chalk.green(`✓ 图表已保存到: ${outputPath}.html`));
+            console.log(chalk.green(`[OK] 图表已保存到: ${outputPath}.html`));
           }
         } else {
           // 在终端显示 ASCII 图表
           console.log();
-          console.log(chalk.cyan('📊 图表预览'));
+          console.log(chalk.cyan('图表预览'));
           console.log(renderASCIChart(chartConfig, type));
         }
       }
     }
 
   } catch (error) {
-    spinner.fail(chalk.red('查询失败'));
+    spinner.stop();
+    console.log(chalk.red('查询失败'));
     if (error instanceof QueryError) {
       throw error;
     }

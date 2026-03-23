@@ -486,8 +486,8 @@ export function formatAdvancedAnalysisResult(result: AdvancedAnalysisResult): st
     forecast: '📈',
     anomaly: '⚠️',
     association: '🔗',
-    correlation: '📊',
-    auto: '🔍'
+    correlation: '[图表]',
+    auto: '[搜索]'
   };
   
   lines.push(`\n${typeIcons[result.type]} ${typeNames[result.type]} - ${result.tableName}`);
@@ -553,7 +553,7 @@ function formatForecastOutput(report: ForecastReport): string {
   lines.push(`📌 趋势方向: ${report.summary.trendDirection}`);
   lines.push(`📌 季节性: ${report.summary.seasonality}`);
   
-  lines.push('\n📊 预测结果:');
+  lines.push('\n预测结果:');
   for (const p of report.predictions) {
     lines.push(`  第 ${p.period} 期: ${p.value.toFixed(2)} [${p.lower.toFixed(2)}, ${p.upper.toFixed(2)}]`);
   }
@@ -562,7 +562,7 @@ function formatForecastOutput(report: ForecastReport): string {
     lines.push(`\n✅ 准确性: MAPE=${report.accuracy.mape}, MAE=${report.accuracy.mae}, RMSE=${report.accuracy.rmse}`);
   }
   
-  lines.push('\n💡 洞察:');
+  lines.push('\n洞察:');
   for (const insight of report.insights) {
     lines.push(`  • ${insight}`);
   }
@@ -574,7 +574,7 @@ function formatAnomalyOutput(report: AnomalyReport): string {
   const lines: string[] = [];
   
   lines.push(`\n${report.summary}`);
-  lines.push(`\n📊 统计: ${report.statistics.anomalyCount}/${report.statistics.totalPoints} 个异常点 (${report.statistics.anomalyRate})`);
+  lines.push(`\n统计: ${report.statistics.anomalyCount}/${report.statistics.totalPoints} 个异常点 (${report.statistics.anomalyRate})`);
   
   if (report.anomalies.length > 0) {
     lines.push('\n⚠️ 异常点列表:');
@@ -587,7 +587,7 @@ function formatAnomalyOutput(report: AnomalyReport): string {
     }
   }
   
-  lines.push('\n💡 洞察:');
+  lines.push('\n洞察:');
   for (const insight of report.insights) {
     lines.push(`  • ${insight}`);
   }
@@ -599,7 +599,7 @@ function formatAssociationOutput(report: AssociationReport): string {
   const lines: string[] = [];
   
   lines.push(`\n${report.summary}`);
-  lines.push(`\n📊 统计: ${report.statistics.ruleCount} 条规则, 平均支持度=${report.statistics.avgSupport}, 平均置信度=${report.statistics.avgConfidence}`);
+  lines.push(`\n统计: ${report.statistics.ruleCount} 条规则, 平均支持度=${report.statistics.avgSupport}, 平均置信度=${report.statistics.avgConfidence}`);
   
   if (report.topRules.length > 0) {
     lines.push('\n🔗 Top 关联规则:');
@@ -610,7 +610,7 @@ function formatAssociationOutput(report: AssociationReport): string {
     }
   }
   
-  lines.push('\n💡 洞察:');
+  lines.push('\n洞察:');
   for (const insight of report.insights) {
     lines.push(`  • ${insight}`);
   }
@@ -624,7 +624,7 @@ function formatCorrelationOutput(report: CorrelationReport): string {
   lines.push(`\n${report.summary}`);
   
   if (report.topCorrelations.length > 0) {
-    lines.push('\n📊 Top 相关性:');
+    lines.push('\nTop 相关性:');
     for (const corr of report.topCorrelations.slice(0, 5)) {
       lines.push(`  ${corr.pair}: r=${corr.coefficient.toFixed(3)}, p=${corr.pValue}`);
       lines.push(`    ${corr.interpretation}`);
@@ -638,7 +638,7 @@ function formatCorrelationOutput(report: CorrelationReport): string {
     }
   }
   
-  lines.push('\n💡 洞察:');
+  lines.push('\n洞察:');
   for (const insight of report.insights) {
     lines.push(`  • ${insight}`);
   }

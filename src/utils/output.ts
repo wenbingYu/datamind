@@ -10,7 +10,8 @@ export function formatTable(columns: string[], rows: any[][]): string {
     head: columns.map(c => chalk.cyan.bold(c)),
     style: {
       head: [],
-      border: ['grey']
+      border: ['grey'],
+      compact: true
     }
   });
 
@@ -41,7 +42,8 @@ function formatCell(cell: any): string {
   }
   
   if (typeof cell === 'boolean') {
-    return cell ? chalk.green('✓') : chalk.red('✗');
+    // 不使用图标，使用文字
+    return cell ? chalk.green('是') : chalk.red('否');
   }
   
   // Truncate long strings

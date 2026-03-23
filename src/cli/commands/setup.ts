@@ -185,12 +185,12 @@ export async function setupCommand(): Promise<void> {
   const provider = PROVIDERS[providerKey];
   
   console.log();
-  console.log(chalk.green(`  ✓ 已选择: ${provider.name}`));
+  console.log(chalk.green(`  [OK] 已选择: ${provider.name}`));
   
   // ===== 步骤 2: 输入 API Key =====
   showStep(2, totalSteps, '配置 API Key');
   
-  console.log(chalk.yellow('  📝 获取 API Key 步骤：'));
+  console.log(chalk.yellow('  获取 API Key 步骤：'));
   console.log();
   console.log(`    1. 访问 ${chalk.cyan(provider.url)}`);
   console.log('    2. 登录/注册账号');
@@ -220,7 +220,7 @@ export async function setupCommand(): Promise<void> {
   const model = provider.models[Math.max(0, Math.min(modelIndex, provider.models.length - 1))] || provider.models[0];
   
   console.log();
-  console.log(chalk.green(`  ✓ 已选择模型: ${model}`));
+  console.log(chalk.green(`  [OK] 已选择模型: ${model}`));
   
   // ===== 保存配置 =====
   const config = {
@@ -261,7 +261,7 @@ export async function setupCommand(): Promise<void> {
   console.log();
   console.log(chalk.cyan('  ────────────────────────────────────────'));
   console.log();
-  console.log(chalk.dim('  💡 数据安全提示：'));
+  console.log(chalk.dim('  数据安全提示：'));
   console.log(chalk.dim('  • API Key 保存在本地，不会上传到云端'));
   console.log(chalk.dim('  • 所有数据处理都在本地完成'));
   console.log(chalk.dim('  • 如需修改配置，运行 datamind setup'));

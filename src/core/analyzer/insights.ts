@@ -345,7 +345,7 @@ export function formatAnalysisResult(result: AnalysisResult): string {
   const lines: string[] = [];
   
   // 标题
-  lines.push(chalk.bold.cyan(`\n📊 ${result.tableName} 数据分析报告`));
+  lines.push(chalk.bold.cyan(`\n${result.tableName} 数据分析报告`));
   lines.push(chalk.grey('═'.repeat(50)));
   
   // 概览
@@ -384,7 +384,7 @@ export function formatAnalysisResult(result: AnalysisResult): string {
   
   // 洞察
   if (result.insights.length > 0) {
-    lines.push(chalk.bold.white('\n💡 洞察发现'));
+    lines.push(chalk.bold.white('\n洞察发现'));
     lines.push(chalk.grey('─'.repeat(30)));
     
     const significanceColors = {
@@ -397,7 +397,7 @@ export function formatAnalysisResult(result: AnalysisResult): string {
       trend: '📈',
       anomaly: '⚠️',
       correlation: '🔗',
-      distribution: '📊'
+      distribution: '[图表]'
     };
     
     for (const insight of result.insights) {
@@ -408,7 +408,7 @@ export function formatAnalysisResult(result: AnalysisResult): string {
       lines.push(`     ${chalk.white(insight.description)}`);
     }
   } else {
-    lines.push(chalk.bold.white('\n💡 洞察发现'));
+    lines.push(chalk.bold.white('\n洞察发现'));
     lines.push(chalk.grey('─'.repeat(30)));
     lines.push(chalk.dim('  暂无明显洞察，尝试导入更多数据进行分析。'));
   }

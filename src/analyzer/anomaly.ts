@@ -497,7 +497,7 @@ export function formatAnomalyReport(
   if (result.statistics.anomalyRate > 0.1) {
     insights.push(`⚠️ 异常比例超过 10%，可能存在系统性数据问题`);
   } else if (result.statistics.anomalyRate > 0.05) {
-    insights.push(`📊 异常比例适中，建议关注异常数据点`);
+    insights.push(`异常比例适中，建议关注异常数据点`);
   } else if (result.statistics.anomalyCount > 0) {
     insights.push(`✅ 异常比例较低，数据整体质量良好`);
   }
@@ -516,7 +516,7 @@ export function formatAnomalyReport(
   // 检测方法洞察
   const methodAgreement = result.anomalies.filter(a => a.methods.length > 1).length;
   if (methodAgreement > 0) {
-    insights.push(`🔍 ${methodAgreement} 个异常点被多种方法共同检测，可信度较高`);
+    insights.push(`${methodAgreement} 个异常点被多种方法共同检测，可信度较高`);
   }
   
   return {

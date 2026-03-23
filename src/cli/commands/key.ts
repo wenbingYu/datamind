@@ -43,7 +43,7 @@ keyCommand
       });
       
       console.log();
-      console.log(chalk.green.bold('✓ API Key 已创建'));
+      console.log(chalk.green.bold('[OK] API Key 已创建'));
       console.log();
       console.log(chalk.white('  名称: ') + chalk.cyan(keyInfo.name));
       console.log(chalk.white('  计划: ') + chalk.cyan(keyInfo.plan));
@@ -134,7 +134,7 @@ keyCommand
       }
       
       console.log();
-      console.log(chalk.green.bold('✓ API Key 已撤销'));
+      console.log(chalk.green.bold('[OK] API Key 已撤销'));
       console.log(chalk.dim(`  Key: ${key}`));
       console.log();
     } catch (error) {
@@ -157,7 +157,7 @@ keyCommand
       }
       
       console.log();
-      console.log(chalk.green.bold('✓ API Key 已删除'));
+      console.log(chalk.green.bold('[OK] API Key 已删除'));
       console.log(chalk.dim(`  Key: ${key}`));
       console.log();
     } catch (error) {
