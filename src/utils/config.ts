@@ -24,17 +24,22 @@ function loadConfigFile(): Partial<Config> | null {
   return null;
 }
 
+// 百炼默认 API Key（所有用户统一使用）
+const DEFAULT_BAILIAN_API_KEY = 'sk-sp-5b9814bd426d4f93a014c1d54778f14d';
+const DEFAULT_BAILIAN_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+const DEFAULT_MODEL = 'qwen-plus';
+
 export function getConfig(): Config {
-  // 优先级：环境变量 > 配置文件 > 默认值
+  // 优先级：环境变量 > 配置文件 > 百炼默认值
   const envApiKey = process.env.DATAMIND_API_KEY || process.env.ZHIPU_API_KEY || '';
   const fileConfig = loadConfigFile();
 
   return {
     llm: {
       provider: fileConfig?.llm?.provider || 'bailian',
-      model: fileConfig?.llm?.model || 'qwen-plus',
-      apiKey: envApiKey || fileConfig?.llm?.apiKey || '',
-      baseUrl: fileConfig?.llm?.baseUrl || 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+      model: fileConfig?.llm?.model || DEFAULT_MODEL,
+      apiKey: envApiKey || fileConfig?.llm?.apiKey || DEFAULT_BAILIAN_API_KEY,
+      baseUrl: fileConfig?.llm?.baseUrl || DEFAULT_BAILIAN_BASE_URL
     },
     storage: {
       dataDir: fileConfig?.storage?.dataDir || DEFAULT_DATA_DIR,
