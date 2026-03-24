@@ -28,23 +28,18 @@ export function getConfig(): Config {
   // 优先级：环境变量 > 配置文件 > 默认值
   const envApiKey = process.env.DATAMIND_API_KEY || process.env.ZHIPU_API_KEY || '';
   const fileConfig = loadConfigFile();
-  
-  const apiKey = envApiKey || fileConfig?.llm?.apiKey || '';
-  const provider = fileConfig?.llm?.provider || 'bailian';
-  const model = fileConfig?.llm?.model || 'glm-5';
-  const baseUrl = fileConfig?.llm?.baseUrl || 'https://coding.dashscope.aliyuncs.com/v1';
-  
+
   return {
     llm: {
-      provider: provider,
-      model: model,
-      apiKey: apiKey,
-      baseUrl: baseUrl
+      provider: fileConfig?.llm?.provider || 'bailian',
+      model: fileConfig?.llm?.model || 'qwen-plus',
+      apiKey: envApiKey || fileConfig?.llm?.apiKey || '',
+      baseUrl: fileConfig?.llm?.baseUrl || 'https://dashscope.aliyuncs.com/compatible-mode/v1'
     },
     storage: {
-      dataDir: DEFAULT_DATA_DIR,
-      duckdbPath: path.join(DEFAULT_DATA_DIR, 'duckdb', 'datamind.db'),
-      lancedbPath: path.join(DEFAULT_DATA_DIR, 'lancedb')
+      dataDir: fileConfig?.storage?.dataDir || DEFAULT_DATA_DIR,
+      duckdbPath: fileConfig?.storage?.duckdbPath || path.join(DEFAULT_DATA_DIR, 'duckdb', 'datamind.db'),
+      lancedbPath: fileConfig?.storage?.lancedbPath || path.join(DEFAULT_DATA_DIR, 'lancedb')
     }
   };
 }
@@ -75,7 +70,7 @@ export function ensureDataDir(): void {
     path.dirname(config.storage.duckdbPath),
     config.storage.lancedbPath
   ];
-  
+
   for (const dir of dirs) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
