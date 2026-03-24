@@ -240,8 +240,9 @@ export function createApp(options: ServerOptions = {}): express.Application {
       
       const originalName = req.file.originalname;
       const tempPath = req.file.path;
+      const ext = path.extname(originalName).toLowerCase();
       
-      if (!originalName.match(/\.(csv|xlsx|xls)$/i)) {
+      if (!ext.match(/\.(csv|xlsx|xls)$/i)) {
         fs.unlinkSync(tempPath);
         return res.status(400).json({
           success: false,
@@ -249,17 +250,36 @@ export function createApp(options: ServerOptions = {}): express.Application {
         });
       }
       
-      const meta = await importCSV(tempPath);
-      await indexTableSchema(meta.name, meta.columns);
+      let metas: any[] = [];
+      
+      if (ext === '.xlsx' || ext === '.xls') {
+        // Excel 文件使用 importExcel
+        const { importExcel } = await import('../core/importer/excel');
+        metas = await importExcel(tempPath);
+        for (const meta of metas) {
+          await indexTableSchema(meta.name, meta.columns);
+        }
+      } else {
+        // CSV 文件使用 importCSV
+        const meta = await importCSV(tempPath);
+        await indexTableSchema(meta.name, meta.columns);
+        metas = [meta];
+      }
+      
       fs.unlinkSync(tempPath);
       
       res.json({
         success: true,
         data: sanitizeBigInt({
-          name: meta.name,
-          id: meta.name,
-          rowCount: meta.rowCount,
-          columns: meta.columns.length
+          tables: metas.map(m => ({
+            name: m.name,
+            id: m.name,
+            rowCount: m.rowCount,
+            columns: m.columns.length
+          })),
+          name: metas[0]?.name,
+          rowCount: metas.reduce((sum, m) => sum + m.rowCount, 0),
+          columnCount: metas[0]?.columns.length || 0
         })
       });
     } catch (error) {
