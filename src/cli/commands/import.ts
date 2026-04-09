@@ -5,6 +5,7 @@ import ora from 'ora';
 import { importCSV } from '../../core/importer/csv';
 import { importExcel } from '../../core/importer/excel';
 import { importParquet } from '../../core/importer/parquet';
+import { importDocx } from '../../core/importer/docx';
 import { getConfig, ensureDataDir } from '../../utils/config';
 import { FileError, ImportError } from '../../utils/errors';
 
@@ -52,8 +53,19 @@ export async function importCommand(file: string): Promise<void> {
       console.log(chalk.white(`  列数: `) + chalk.green(meta.columns.length.toString()));
       console.log();
       console.log(chalk.dim(`使用 'datamind ask "问题"' 查询数据`));
+    } else if (ext === '.docx' || ext === '.doc') {
+      const metas = await importDocx(file);
+      spinner.succeed(chalk.green(`导入成功! 导入了 ${metas.length} 个表`));
+      console.log();
+      for (const meta of metas) {
+        console.log(chalk.white(`  表名: `) + chalk.cyan(meta.name));
+        console.log(chalk.white(`  行数: `) + chalk.green(meta.rowCount.toLocaleString()));
+        console.log(chalk.white(`  列数: `) + chalk.green(meta.columns.length.toString()));
+        console.log();
+      }
+      console.log(chalk.dim(`使用 'datamind ask "问题"' 查询数据`));
     } else {
-      throw new FileError(`不支持的文件格式: ${ext}，目前支持: CSV, Excel (.xlsx/.xls), Parquet`);
+      throw new FileError(`不支持的文件格式: ${ext}，目前支持: CSV, Excel (.xlsx/.xls), Parquet, Word (.docx/.doc)`);
     }
   } catch (error) {
     spinner.fail(chalk.red('导入失败'));

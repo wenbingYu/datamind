@@ -11,12 +11,14 @@ import { exportCommand } from './commands/export';
 import { uiCommand } from './commands/ui';
 import chartCommand from './commands/chart';
 import keyCommand from './commands/key';
+import rulesCommand from './commands/rules';
 import { serveCommand } from './commands/serve';
 import { setupCommand, reconfigureCommand, showConfig, needSetup } from './commands/setup';
 
 // 全局错误处理
 process.on('uncaughtException', (error: Error) => {
   if (error instanceof DataMindError) {
+    console.error(chalk.red(`[${error.code}] ${error.message}`));
     process.exit(error.exitCode);
   } else {
     console.error(chalk.red('未预期的错误:'), error.message);
@@ -27,6 +29,7 @@ process.on('uncaughtException', (error: Error) => {
 
 process.on('unhandledRejection', (reason: unknown) => {
   if (reason instanceof DataMindError) {
+    console.error(chalk.red(`[${reason.code}] ${reason.message}`));
     process.exit(reason.exitCode);
   } else if (reason instanceof Error) {
     console.error(chalk.red('未预期的错误:'), reason.message);
@@ -171,6 +174,9 @@ program.addCommand(chartCommand);
 // datamind key <action>
 program.addCommand(keyCommand);
 
+// datamind rules
+program.addCommand(rulesCommand);
+
 // Parse arguments
 program.parse();
 
@@ -208,6 +214,11 @@ if (!process.argv.slice(2).length) {
   console.log(chalk.dim('  API Key 管理:'));
   console.log(chalk.dim('    datamind key generate --plan pro  创建 API Key'));
   console.log(chalk.dim('    datamind key list                 列出 API Keys'));
+  console.log();
+  console.log(chalk.dim('  NLP 规则管理:'));
+  console.log(chalk.dim('    datamind rules                    查看规则摘要'));
+  console.log(chalk.dim('    datamind rules add <类别> <词> <原形>  添加规则'));
+  console.log(chalk.dim('    datamind rules test <词>          测试词形归一'));
   console.log();
   program.outputHelp();
 }

@@ -55,6 +55,15 @@ export async function askCommand(
     } catch {
       // 忽略错误，使用所有表
     }
+
+    // 补充：若问题中显式提到了某个表名，确保该表也被包含
+    const allTables = await getAllTablesMeta();
+    const questionLower = question.toLowerCase();
+    for (const t of allTables) {
+      if (questionLower.includes(t.name.toLowerCase()) && !tables.find(x => x.name === t.name)) {
+        tables.push(t);
+      }
+    }
   }
 
   // 使用简单的 spinner，不显示图标

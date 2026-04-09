@@ -11,7 +11,28 @@ const SQL_SYSTEM_PROMPT = `你是一个 SQL 专家，负责将自然语言问题
 5. 不要使用不存在的列
 6. 对于日期比较，使用标准 SQL 语法
 7. 对于中文字符串，正确处理编码
-8. 根据用户问题和表结构，生成最合适的 SQL 查询`;
+8. 根据用户问题和表结构，生成最合适的 SQL 查询
+
+## 文档单词匹配规则
+当数据库中存在 _words 表和 _paragraphs 表时，说明用户导入了 Word 文档。
+- _words 表包含 word（小写原始单词）、lemma（词形还原后的原形）、paragraph_id（段落编号）、position（段内位置）
+- _paragraphs 表包含 paragraph_id、text（原始段落文本）、word_count
+- vocabulary 表若存在 lemma 列，则该列为词汇原形
+
+**重要：匹配时必须使用 lemma 列进行 JOIN，而非 word 列，这样可以将动词变体（如 walked/walking）、名词复数、形容词比较级等归一到原形进行统计。**
+
+当用户查询单词出现次数时:
+  SELECT v."word", COUNT(w."lemma") AS cnt
+  FROM "vocabulary" v
+  LEFT JOIN "xxx_words" w ON v."lemma" = w."lemma"
+  GROUP BY v."word"
+  ORDER BY cnt DESC
+
+当用户查询单词出现位置时:
+  SELECT w."word", w."lemma", w."paragraph_id", w."position", p."text"
+  FROM "xxx_words" w
+  JOIN "xxx_paragraphs" p ON w."paragraph_id" = p."paragraph_id"
+  WHERE w."lemma" = '<目标单词原形>'`;
 
 export class SQLBuilder {
   private client: LLMClient;
@@ -38,7 +59,7 @@ export class SQLBuilder {
     let tablesToUse = normalTables.length > 0 ? normalTables : uuidTables;
 
     // 限制表的数量，避免 prompt 过长
-    const maxTables = 3;
+    const maxTables = 5;
     tablesToUse = tablesToUse.slice(0, maxTables);
 
     if (tablesToUse.length === 0) {

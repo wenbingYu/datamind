@@ -22,13 +22,30 @@ export class LLMClient {
     
     messages.push({ role: 'user', content: prompt });
 
+    // 先尝试非流式请求
     const response = await this.client.chat.completions.create({
       model: this.model,
       messages,
       temperature: 0.1
     });
 
-    return response.choices[0]?.message?.content || '';
+    const content = response.choices[0]?.message?.content;
+    if (content) return content;
+
+    // 某些 API 端点仅在流式模式下返回内容，回退到流式请求
+    const stream = await this.client.chat.completions.create({
+      model: this.model,
+      messages,
+      temperature: 0.1,
+      stream: true
+    });
+
+    let result = '';
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta?.content;
+      if (delta) result += delta;
+    }
+    return result;
   }
 
   async chatWithJSON<T>(prompt: string, systemPrompt?: string): Promise<T> {
@@ -61,4 +78,8 @@ export function getLLMClient(config: Config): LLMClient {
     client = new LLMClient(config);
   }
   return client;
+}
+
+export function resetLLMClient(): void {
+  client = null;
 }
