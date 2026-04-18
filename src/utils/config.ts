@@ -30,15 +30,16 @@ const DEFAULT_BAILIAN_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode
 const DEFAULT_MODEL = 'qwen-plus';
 
 export function getConfig(): Config {
-  // 优先级：环境变量 > 配置文件 > 百炼默认值
-  const envApiKey = process.env.DATAMIND_API_KEY || process.env.ZHIPU_API_KEY || '';
+  // 优先级：配置文件 > 环境变量 > 百炼默认值
+  // 避免历史环境变量覆盖掉用户在 setup 或 config.json 中保存的有效配置
   const fileConfig = loadConfigFile();
+  const envApiKey = process.env.DATAMIND_API_KEY || process.env.ZHIPU_API_KEY || '';
 
   return {
     llm: {
       provider: fileConfig?.llm?.provider || 'bailian',
       model: fileConfig?.llm?.model || DEFAULT_MODEL,
-      apiKey: envApiKey || fileConfig?.llm?.apiKey || DEFAULT_BAILIAN_API_KEY,
+      apiKey: fileConfig?.llm?.apiKey || envApiKey || DEFAULT_BAILIAN_API_KEY,
       baseUrl: fileConfig?.llm?.baseUrl || DEFAULT_BAILIAN_BASE_URL
     },
     storage: {

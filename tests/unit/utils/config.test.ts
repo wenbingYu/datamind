@@ -6,7 +6,8 @@ import { ConfigError } from '../../../src/utils/errors';
 // Mock fs to avoid creating directories during tests
 jest.mock('fs', () => ({
   existsSync: jest.fn(() => true),
-  mkdirSync: jest.fn()
+  mkdirSync: jest.fn(),
+  readFileSync: jest.fn(() => '')
 }));
 
 import * as fs from 'fs';
@@ -33,11 +34,14 @@ describe('Config', () => {
       const config = getConfig();
       
       expect(config.llm.provider).toBe('bailian');
-      expect(config.llm.model).toBe('glm-5');
-      expect(config.llm.baseUrl).toBe('https://coding.dashscope.aliyuncs.com/v1');
+      expect(config.llm.model).toBe('qwen-plus');
+      expect(config.llm.baseUrl).toBe('https://dashscope.aliyuncs.com/compatible-mode/v1');
     });
 
     it('should use DATAMIND_API_KEY if set', () => {
+      (fs.readFileSync as jest.Mock).mockImplementation(() => {
+        throw new Error('no config file');
+      });
       process.env.DATAMIND_API_KEY = 'test-datamind-key';
       
       const config = getConfig();
@@ -46,6 +50,9 @@ describe('Config', () => {
     });
 
     it('should fallback to ZHIPU_API_KEY if DATAMIND_API_KEY not set', () => {
+      (fs.readFileSync as jest.Mock).mockImplementation(() => {
+        throw new Error('no config file');
+      });
       delete process.env.DATAMIND_API_KEY;
       process.env.ZHIPU_API_KEY = 'test-zhipu-key';
       
@@ -55,12 +62,34 @@ describe('Config', () => {
     });
 
     it('should prefer DATAMIND_API_KEY over ZHIPU_API_KEY', () => {
+      (fs.readFileSync as jest.Mock).mockImplementation(() => {
+        throw new Error('no config file');
+      });
       process.env.DATAMIND_API_KEY = 'datamind-key';
       process.env.ZHIPU_API_KEY = 'zhipu-key';
       
       const config = getConfig();
       
       expect(config.llm.apiKey).toBe('datamind-key');
+    });
+
+    it('should prefer config file apiKey over environment variables', () => {
+      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify({
+        llm: {
+          provider: 'custom_gpt',
+          model: 'gpt-5.4',
+          apiKey: 'config-file-key',
+          baseUrl: 'https://example.com/v1'
+        }
+      }));
+      process.env.DATAMIND_API_KEY = 'stale-env-key';
+      
+      const config = getConfig();
+      
+      expect(config.llm.provider).toBe('custom_gpt');
+      expect(config.llm.model).toBe('gpt-5.4');
+      expect(config.llm.apiKey).toBe('config-file-key');
+      expect(config.llm.baseUrl).toBe('https://example.com/v1');
     });
 
     it('should return correct storage paths', () => {

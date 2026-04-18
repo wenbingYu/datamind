@@ -36,7 +36,7 @@ export interface Insight {
 /** 配置 */
 export interface Config {
   llm: {
-    provider: 'openai' | 'bailian' | 'zhipu' | 'ollama';
+    provider: 'openai' | 'bailian' | 'zhipu' | 'ollama' | 'custom_gpt';
     model: string;
     apiKey?: string;
     baseUrl?: string;
